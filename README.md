@@ -18,7 +18,7 @@ Duplicated encounters were excluded based on: Average item level, duration of th
 
 <img src="_img/data_pipeline.jpg"/>
 
-The raw data file in data table ("Excel") format can be found in this repo: https://github.com/ForgeGit/ICC_PTR/blob/main/raw_data/ICC_PTR_clean_Data2023_09_03_h17_m18.csv
+The raw data file in data table ("Excel") format can be found in this repo: https://github.com/ForgeGit/ICC_PTR/blob/main/raw_data/ICC_PTR_clean_Data2023_09_03_h18_m38.csv
 
 ## Limitations
 
