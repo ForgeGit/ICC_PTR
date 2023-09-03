@@ -1,0 +1,672 @@
+---
+title: "ICC PTR Data"
+output: html_document
+date: "2023-09-03"
+---
+# Config
+
+## -Libraries 
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+
+options(scipen = 100)
+options(Encoding="UTF-8")
+#install.packages("viridis")  # Install
+#install.packages(c("httr", "jsonlite","tidyverse","gtsummary","gghighlight"))
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(gtsummary)
+library(gghighlight)
+library(png)
+library(grid)
+library("viridis") 
+library(ggplot2)
+library(showtext)
+#> Loading required package: sysfonts
+#> Loading required package: showtextdb
+library(ggrepel)
+library(cowplot)
+library(ggtext)
+library(extrafont)
+library(scales)
+library(ggridges)
+library(ggpubr)
+library(magick)
+```
+
+## -Utils 
+
+```{r}
+scale_factor = 2.65
+
+# ` variable name `     |n      or | or \ Symbol on Keyboard
+#"forge-"    
+#e901 github
+#e900 discord
+font_add(family = "forgefooter", "forgefooter.ttf")
+font_import()
+n
+showtext_auto(TRUE)
+```
+
+## -Themes
+
+```{r}
+scale_factor = 2.65
+
+vivax_theme <- function() {
+  theme_bw() +
+    
+    theme(axis.title.x = element_text(size = scale_factor * 13),
+          axis.title.y = element_text(size = scale_factor * 13),
+          plot.title = element_markdown(face = "bold",
+                                        size = scale_factor * 16,
+                                        hjust = 0),
+          plot.subtitle = element_markdown(face="italic",
+                                           size = scale_factor * 12,
+                                           lineheight=0.3),
+          plot.caption = element_markdown(face = "italic",
+                                          hjust = 0,
+                                          vjust=1,
+                                          size = scale_factor * 8,
+                                          lineheight=0.3,
+                                          margin = margin(t = -10, unit = "pt")),
+          legend.position = c(0.26, 0.8),
+          legend.spacing.x = unit(1, "pt"),
+          legend.spacing.y = unit(0.5, "pt"),
+          legend.direction="horizontal",
+          legend.box.just = "left",
+          legend.title = element_text(size=scale_factor*13),
+          legend.text = element_text(size = scale_factor * 11,
+                                     lineheight=0.5),
+          #  legend.background = element_rect(fill = "transparent"),
+          axis.text = element_markdown(size= scale_factor * 10),
+          strip.text.x = element_text(size = scale_factor * 12),
+          legend.background = element_rect(fill = alpha('white', 0.4)),
+          axis.text.x = element_markdown(size= scale_factor * 10,
+                                         angle=45,hjust=1,
+                                         margin = margin(t = -1, unit = "pt")),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank()
+    )
+}
+
+vivax_theme_title <- function() {
+  theme_bw() +
+    
+    theme(axis.title.x = element_text(size = scale_factor * 13),
+          axis.title.y = element_text(size = scale_factor * 13),
+          plot.title = element_markdown(face = "bold",
+                                        size = scale_factor * 17,
+                                        hjust = 0,
+                                        lineheight=0.3),
+          plot.subtitle = element_markdown(face="italic",
+                                           size = scale_factor * 13,
+                                           lineheight=0.3),
+          plot.caption = element_markdown(face = "italic",
+                                          hjust = 0,
+                                          vjust=1,
+                                          size = scale_factor * 8,
+                                          lineheight=c(0.5,0,0.75),
+                                          margin = margin(t = -10, unit = "pt")),
+          legend.position = c(0.26, 0.8),
+          legend.spacing.x = unit(1, "pt"),
+          legend.spacing.y = unit(0.5, "pt"),
+          legend.direction="horizontal",
+          legend.box.just = "left",
+          legend.title = element_text(size=scale_factor*13),
+          legend.text = element_text(size = scale_factor * 11,
+                                     lineheight=0.5),
+          #  legend.background = element_rect(fill = "transparent"),
+          axis.text = element_markdown(size= scale_factor * 10),
+          strip.text.x = element_text(size = scale_factor * 12),
+          legend.background = element_rect(fill = alpha('white', 0.4)),
+          axis.text.x = element_markdown(size= scale_factor * 10,
+                                         angle=45,hjust=1,
+                                          margin = margin(t = -1, unit = "pt"))
+          )
+}
+```
+
+
+# Data
+
+## +Load
+
+```{r}
+df_final <- read.csv("./raw_data/ICC_PTR_clean_Data2023_09_03_h17_m18.csv")
+
+
+df_final <- df_final %>%
+  ### Color
+  mutate(encounterName = encounterNameColor )
+
+
+df_final_10m <- df_final %>%
+  filter(size==10)
+
+
+df_final_25m <- df_final %>%
+  filter(size==25)
+```
+
+
+## +Format 25m
+
+```{r} 
+### Wide
+order_25_wide <- df_final_25m %>% 
+  
+  group_by(encounterName,kill,difficulty) %>% 
+  
+  summarise(n=n()) %>%
+  
+  ungroup() %>%
+  
+  mutate(kill=as.character(kill)) %>%
+  
+  pivot_wider(names_from=kill,values_from=n) %>%
+  
+  rename(Wipes=`FALSE`,
+         Kills=`TRUE`) %>% 
+  
+  mutate(Kills = ifelse(is.na(Kills),0,Kills),
+         pulls =  Wipes + Kills,
+         per_kill = Kills / pulls, 
+         per_wipe =  Wipes / pulls,
+         ratio = ifelse(per_wipe==1,"-",paste0(as.character(round(Wipes/Kills)),":1")))
+
+
+
+### Long
+order_25_long <- order_25_wide  %>%
+  
+  select(encounterName,Wipes,Kills,pulls,difficulty,ratio ) %>%
+  
+  pivot_longer(cols=Wipes:Kills,
+               names_to = "Result", 
+               values_to = "n") %>%
+  
+  mutate(per_result = n/pulls,
+         position = 1.1)
+
+order_25_long_hm <- order_25_long %>%  
+  filter(difficulty=="Hard" & Result=="Kills") %>% 
+  arrange(desc(per_result)) %>%
+  select(encounterName) %>% pull(.)
+
+order_25_long_norm <- order_25_long %>%  
+  filter(difficulty=="Normal" & Result=="Kills") %>% 
+  arrange(desc(per_result)) %>%
+  select(encounterName) %>% pull(.)
+```
+
+## +Format 10m
+```{r} 
+### Wide
+order_10_wide <- df_final_10m  %>%
+  
+  group_by(encounterName,kill,difficulty) %>% 
+  
+  summarise(n=n()) %>%
+  
+  ungroup() %>%
+  
+  mutate(kill=as.character(kill)) %>%
+  
+  pivot_wider(names_from=kill,values_from=n) %>%
+  
+  rename(Wipes=`FALSE`,
+         Kills=`TRUE`) %>% 
+  
+  mutate(Kills = ifelse(is.na(Kills),0,Kills),
+         pulls =  Wipes + Kills,
+         per_kill = Kills / pulls, 
+         per_wipe =  Wipes / pulls,
+         ratio = ifelse(per_wipe==1,"-",paste0(as.character(round(Wipes/Kills)),":1")))
+
+
+
+### Long
+order_10_long <- order_10_wide  %>%
+  
+  select(encounterName,Wipes,Kills,pulls,difficulty,ratio) %>%
+  
+  pivot_longer(cols=Wipes:Kills,
+               names_to = "Result", 
+               values_to = "n") %>%
+  
+  mutate(per_result = n/pulls,
+         position = 1.1)
+
+order_10_long_hm <- order_10_long %>%  
+  filter(difficulty=="Hard" & Result=="Kills") %>% 
+  arrange(desc(per_result)) %>%
+  select(encounterName) %>% pull(.)
+
+order_10_long_norm <- order_10_long %>%  
+  filter(difficulty=="Normal" & Result=="Kills") %>% 
+  arrange(desc(per_result)) %>%
+  select(encounterName) %>% pull(.)
+```
+
+## +Extras
+
+### *Boss order
+
+```{r}
+boss_order_wing <- c(
+  "<span style='color:#464646;'>Marrow</span>" ,  
+  "<span style='color:#464646;'>LDW</span>"  ,    
+  "<span style='color:#464646;'>Gunship</span>" , 
+  "<span style='color:#464646;'>Saurfang</span>" , 
+  "<span style='color:#397000;'>Rotface</span>"  ,
+  "<span style='color:#397000;'>Festergut</span>" ,
+  "<span style='color:#397000;'>Putricide*</span>",
+  "<span style='color:#6D0027;'>Council</span>" , 
+  "<span style='color:#6D0027;'>Queen</span>"  ,
+  "<span style='color:#040A54;'>Valithria</span>", 
+  "<span style='color:#040A54;'>Sindra</span>",  
+  "<span style='color:#000000;'>LK</span>" 
+)
+```
+
+
+# Plot
+
+### Title segment
+
+```{r} 
+###
+title <- ggplot() +
+    vivax_theme_title() + 
+  labs(title="<p> Icecrown Citadel (ICC) First PTR <br><b><span style='color:#0673B3;'>Kills</span></b> and <b><span style='color:#FF3D00;'>Wipes</span></b></p>",
+       subtitle="<p>  </p>") +                                                   # Remove grid, color & borders
+  theme(axis.line = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
+
+
+
+ggsave("./_img/transition/plot_title.png",title, 
+       width = 12, height =4,units="in",device = "png",dpi=300)
+
+
+
+plot_title  <- magick::image_read("./plot_title.png")
+###
+title <- ggplot()  +
+    vivax_theme_title() + 
+  labs(title="",
+       subtitle="<p>Data from publicly uploaded logs to Warcraft Logs Classic from Aug 29 2023 21:00 to Sep 01 2023 21:00<br> <b><span style='color:#464646;'>Lower Spire</span>, <span style='color:#397000;'>Plague</span>, <span style='color:#6D0027;'>Blood</span></b> and <b><span style='color:#040A54;'>Frost</span></b> wing bosses + <b>The Frozen Throne (Lich King)</b></p>") +                                                   # Remove grid, color & borders
+  theme(axis.line = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
+
+
+
+ggsave("./_img/transition/plot_subtitle.png",title, 
+       width = 12, height =4,units="in",device = "png",dpi=300)
+
+
+
+plot_title_2  <- magick::image_read("./_img/transition/plot_subtitle.png")
+
+###
+title <- ggplot()  +
+    vivax_theme_title() + 
+  labs(title="",
+       subtitle="") +                                                   # Remove grid, color & borders
+  theme(axis.line = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
+
+
+
+ggsave("./_img/transition/plot_title_white.png",title, 
+       width = 12, height =4,units="in",device = "png",dpi=300)
+
+
+
+plot_title_white  <- magick::image_read("./_img/transition/plot_title_white.png")
+```
+
+
+
+### 10m plots
+
+```{r} 
+
+
+plot_10_h <- ggplot(order_10_long %>% 
+                      filter(difficulty=="Hard") %>%
+                      mutate(encounterName=factor(encounterName,
+                                                  levels=boss_order_wing)), 
+                    aes(fill = Result, 
+                        y = per_result, 
+                        x = encounterName)) + 
+  geom_bar(position="fill", stat="identity") +
+  
+  geom_text(aes(label = ifelse(Result=="Kills", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=1.06, lineheight = .225,
+            size= scale_factor*3.5, color="#055482", fontface = "bold"
+  ) +
+  
+  geom_text(aes(label = ifelse(Result=="Wipes", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=-0.06, lineheight = .225,
+            size= scale_factor*3.5, color="#CC3100", fontface = "bold"
+  )+
+  
+  geom_text(aes(label = ratio),
+            y=1.155, lineheight = .225,
+            size= scale_factor*3.5, color="black", fontface = "italic"
+  ) +
+  
+  scale_fill_manual(values=c("#055482","#CC3100"))+
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="<p>ICC Heroic - 10 man </p>",x="",y="Pulls",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; Discord: Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR</p>"),
+       subtitle="Data from: 977 logs containing 13,415 heroic encounters")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(-0.1,1.16),
+                     breaks = seq(0,1,by=0.25))+
+  annotate(
+    x = -Inf, y = -0.075, 
+    label = "Wipes-", geom = "text",
+    color = "#CC3100",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.075, 
+    label = "Kills-", geom = "text",
+    color = "#055482",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.155, 
+    label = "Wipes:Kill-", geom = "text",
+    color = "black",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  coord_cartesian(clip = "off")+
+  geom_vline(xintercept=4.5)+
+  geom_vline(xintercept=7.5)+
+  geom_vline(xintercept=9.5)+
+  geom_vline(xintercept=11.5)+ 
+  geom_hline(yintercept=0.5, linetype="dashed",size=0.25)+ 
+  geom_hline(yintercept=0.25, linetype="dotted",size=0.25)+ 
+  geom_hline(yintercept=0.75, linetype="dotted",size=0.25)
+
+
+plot_10_n <- ggplot(order_10_long %>% 
+                      filter(difficulty=="Normal") %>%
+                      mutate(encounterName=factor(encounterName,
+                                                  levels=boss_order_wing)), 
+                    aes(fill = Result, 
+                        y = per_result, 
+                        x = encounterName))  + 
+  geom_bar(position="fill", stat="identity") +
+  
+  geom_text(aes(label = ifelse(Result=="Kills", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=1.06, lineheight = .225,
+            size= scale_factor*3.5, color="#1888CB", fontface = "bold"
+  ) +
+  
+  geom_text(aes(label = ifelse(Result=="Wipes", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=-0.06, lineheight = .225,
+            size= scale_factor*3.5, color="#FF4A11", fontface = "bold"
+  ) +
+  
+  geom_text(aes(label = ratio),
+            y=1.155, lineheight = .225,
+            size= scale_factor*3.5, color="black", fontface = "italic"
+  ) +
+  scale_fill_manual(values=c("#1888CB","#FF4A11"))+
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="ICC Normal - 10 man",x="",y=" ",
+       caption=c("<p> Support: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> Last Update: 03/09/2023 &#40;dd/mm/yyyy&#41; 14:00 UTC </p>"),
+       subtitle="Data from: 496 logs containing 3,312 normal encounters")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(-0.1,1.16),
+                     breaks = seq(0,1,by=0.25)) +
+  annotate(
+    x = -Inf, y = -0.075, 
+    label = "Wipes-", geom = "text",
+    color = "#FF4A11",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.075, 
+    label = "Kills-", geom = "text",
+    color = "#1888CB",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.155, 
+    label = "Wipes:Kill-", geom = "text",
+    color = "black",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  coord_cartesian(clip = "off")+
+  geom_vline(xintercept=4.5)+
+  geom_vline(xintercept=7.5)+
+  geom_vline(xintercept=9.5)+
+  geom_vline(xintercept=11.5)+ 
+  geom_hline(yintercept=0.5, linetype="dashed",size=0.25)+ 
+  geom_hline(yintercept=0.25, linetype="dotted",size=0.25)+ 
+  geom_hline(yintercept=0.75, linetype="dotted",size=0.25)
+
+
+ggsave("./_img/transition/plot_10_h.png",plot_10_h, 
+       width = 6, height =4,units="in",device = "png",dpi=300)
+
+
+ggsave("./_img/transition/plot_10_n.png",plot_10_n, 
+       width = 6, height =4,units="in",device = "png",dpi=300)
+
+plot_10_h_img <- magick::image_read("./_img/transition/plot_10_h.png")
+plot_10_n_img <- magick::image_read("./_img/transition/plot_10_n.png")
+```
+
+
+### 25m plots
+```{r} 
+###
+plot_25_h <- ggplot(order_25_long %>% 
+                      filter(difficulty=="Hard") %>%
+                      mutate(encounterName=factor(encounterName,
+                                                  levels=boss_order_wing)), 
+                    aes(fill = Result, 
+                        y = per_result, 
+                        x = encounterName)) + 
+  geom_bar(position="fill", stat="identity") +
+  
+  geom_text(aes(label = ifelse(Result=="Kills", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=1.06, lineheight = .225,
+            size= scale_factor*3.5, color="#055482", fontface = "bold"
+  ) +
+  
+  geom_text(aes(label = ifelse(Result=="Wipes", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=-0.06, lineheight = .225,
+            size= scale_factor*3.5, color="#CC3100", fontface = "bold"
+  )+
+  
+  geom_text(aes(label = ratio),
+            y=1.155, lineheight = .225,
+            size= scale_factor*3.5, color="black", fontface = "italic"
+  ) +
+  
+  scale_fill_manual(values=c("#055482","#CC3100"))+
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="ICC Heroic - 25 man",x="",y="Pulls",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; Discord: Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR</p>"),
+       subtitle="Data from: 1,767 logs containing 25,911 heroic encounters")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(-0.1,1.16),
+                     breaks = seq(0,1,by=0.25))+
+  annotate(
+    x = -Inf, y = -0.075, 
+    label = "Wipes-", geom = "text",
+    color = "#CC3100",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.075, 
+    label = "Kills-", geom = "text",
+    color = "#055482",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.155, 
+    label = "Wipes:Kill-", geom = "text",
+    color = "black",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  coord_cartesian(clip = "off")+
+  geom_vline(xintercept=4.5)+
+  geom_vline(xintercept=7.5)+
+  geom_vline(xintercept=9.5)+
+  geom_vline(xintercept=11.5)+ 
+  geom_hline(yintercept=0.5, linetype="dashed",size=0.25)+ 
+  geom_hline(yintercept=0.25, linetype="dotted",size=0.25)+ 
+  geom_hline(yintercept=0.75, linetype="dotted",size=0.25)
+
+
+
+plot_25_n <- ggplot(order_25_long %>% 
+                      filter(difficulty=="Normal") %>%
+                      mutate(encounterName=factor(encounterName,
+                                                  levels=boss_order_wing)), 
+                    aes(fill = Result, 
+                        y = per_result, 
+                        x = encounterName))  + 
+  geom_bar(position="fill", stat="identity") +
+  
+  geom_text(aes(label = ifelse(Result=="Kills", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=1.06, lineheight = .225,
+            size= scale_factor*3.5, color="#1888CB", fontface = "bold"
+  ) +
+  
+  geom_text(aes(label = ifelse(Result=="Wipes", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=-0.06, lineheight = .225,
+            size= scale_factor*3.5, color="#FF4A11", fontface = "bold"
+  ) +
+  
+  geom_text(aes(label = ratio),
+            y=1.155, lineheight = .225,
+            size= scale_factor*3.5, color="black", fontface = "italic"
+  ) +
+  scale_fill_manual(values=c("#1888CB","#FF4A11"))+
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="ICC Normal - 25 man",x="",y=" ",
+       caption=c("<p> Support: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> Last Update: 03/09/2023 &#40;dd/mm/yyyy&#41; 14:00 UTC </p>"),
+       subtitle="Data from: 1,159 logs containing 6,917 normal encounters")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(-0.1,1.16),
+                     breaks = seq(0,1,by=0.25)) +
+  annotate(
+    x = -Inf, y = -0.075, 
+    label = "Wipes-", geom = "text",
+    color = "#FF4A11",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.075, 
+    label = "Kills-", geom = "text",
+    color = "#1888CB",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.155, 
+    label = "Wipes:Kill-", geom = "text",
+    color = "black",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  coord_cartesian(clip = "off")+
+  geom_vline(xintercept=4.5)+
+  geom_vline(xintercept=7.5)+
+  geom_vline(xintercept=9.5)+
+  geom_vline(xintercept=11.5) + 
+  geom_hline(yintercept=0.5, linetype="dashed",size=0.25)+ 
+  geom_hline(yintercept=0.25, linetype="dotted",size=0.25)+ 
+  geom_hline(yintercept=0.75, linetype="dotted",size=0.25)
+
+ggsave("./_img/transition/plot_25_h.png",plot_25_h, 
+       width = 6, height =4,units="in",device = "png",dpi=300)
+
+
+ggsave("./_img/transition/plot_25_n.png",plot_25_n, 
+       width = 6, height =4,units="in",device = "png",dpi=300)
+
+plot_25_h_img <- magick::image_read("./_img/transition/plot_25_h.png")
+plot_25_n_img <- magick::image_read("./_img/transition/plot_25_n.png")
+```
+
+## Final canvas
+
+```{r} 
+canvas <- image_blank(width = 3600, height = 2425)
+
+
+canvas <- image_composite(canvas, plot_title_white, offset = "+0+0",operator = "over")
+canvas <- image_composite(canvas, plot_title, offset = "+160+10",operator = "over")
+canvas <- image_composite(canvas, plot_title_2, offset = "+1150+0",operator = "over")
+
+canvas <- image_composite(canvas,plot_25_h_img , offset = "+0+145",operator = "over")
+canvas <- image_composite(canvas,  plot_25_n_img, offset = "+1800+145",operator = "over")
+canvas <- image_composite(canvas, plot_10_h_img , offset = "+0+1240",operator = "over")
+canvas <- image_composite(canvas,plot_10_n_img  , offset = "+1800+1240",operator = "over")
+image_write(canvas, "./_img/final_image_25_10_wing_title.jpg")
+
+
+
+
+
+
+```
+
+
