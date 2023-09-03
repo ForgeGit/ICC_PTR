@@ -63,10 +63,12 @@ vivax_theme <- function() {
           axis.title.y = element_text(size = scale_factor * 13),
           plot.title = element_markdown(face = "bold",
                                         size = scale_factor * 16,
-                                        hjust = 0),
+                                        hjust = 0, 
+                                        margin = margin(b = -1)),
           plot.subtitle = element_markdown(face="italic",
                                            size = scale_factor * 12,
-                                           lineheight=0.3),
+                                           lineheight=0.3, 
+                                        margin = margin(b = 0.5)),
           plot.caption = element_markdown(face = "italic",
                                           hjust = 0,
                                           vjust=1,
@@ -136,7 +138,7 @@ vivax_theme_title <- function() {
 ## +Load
 
 ```{r}
-df_final <- read.csv("./raw_data/ICC_PTR_clean_Data2023_09_03_h17_m18.csv")
+df_final <- read.csv("./raw_data/ICC_PTR_clean_Data2023_09_03_h18_m38.csv")
 
 
 df_final <- df_final %>%
@@ -258,18 +260,18 @@ order_10_long_norm <- order_10_long %>%
 
 ```{r}
 boss_order_wing <- c(
-  "<span style='color:#464646;'>Marrow</span>" ,  
-  "<span style='color:#464646;'>LDW</span>"  ,    
-  "<span style='color:#464646;'>Gunship</span>" , 
-  "<span style='color:#464646;'>Saurfang</span>" , 
-  "<span style='color:#397000;'>Rotface</span>"  ,
-  "<span style='color:#397000;'>Festergut</span>" ,
-  "<span style='color:#397000;'>Putricide*</span>",
-  "<span style='color:#6D0027;'>Council</span>" , 
-  "<span style='color:#6D0027;'>Queen</span>"  ,
-  "<span style='color:#040A54;'>Valithria</span>", 
-  "<span style='color:#040A54;'>Sindra</span>",  
-  "<span style='color:#000000;'>LK</span>" 
+  "<b><span style='color:#464646;'>Marrow</span></b>" ,  
+  "<b><span style='color:#464646;'>LDW</span></b>"  ,    
+  "<b><span style='color:#464646;'>Gunship</span></b>" , 
+  "<b><span style='color:#464646;'>Saurfang</span></b>" , 
+  "<b><span style='color:#397000;'>Rotface</span></b>"  ,
+  "<b><span style='color:#397000;'>Festergut</span></b>" ,
+  "<b><span style='color:#397000;'>Putricide*</span></b>",
+  "<b><span style='color:#6D0027;'>Council</span></b>" , 
+  "<b><span style='color:#6D0027;'>Queen</span></b>"  ,
+  "<b><span style='color:#040A54;'>Valithria</span></b>", 
+  "<b><span style='color:#040A54;'>Sindra</span></b>",  
+  "<b><span style='color:#000000;'>LK</span></b>" 
 )
 ```
 
@@ -344,8 +346,6 @@ plot_title_white  <- magick::image_read("./_img/transition/plot_title_white.png"
 ### 10m plots
 
 ```{r} 
-
-
 plot_10_h <- ggplot(order_10_long %>% 
                       filter(difficulty=="Hard") %>%
                       mutate(encounterName=factor(encounterName,
@@ -375,7 +375,7 @@ plot_10_h <- ggplot(order_10_long %>%
   scale_fill_manual(values=c("#055482","#CC3100"))+
   vivax_theme() + 
   guides(fill="none") +
-  labs(title="<p>ICC Heroic - 10 man </p>",x="",y="Pulls",
+  labs(title="<p>ICC Heroic - 10 man </p>",x="",y="Encounters",
        caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; Discord: Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR</p>"),
        subtitle="Data from: 977 logs containing 13,415 heroic encounters")+
   scale_y_continuous(labels = scales::percent, 
@@ -527,7 +527,7 @@ plot_25_h <- ggplot(order_25_long %>%
   scale_fill_manual(values=c("#055482","#CC3100"))+
   vivax_theme() + 
   guides(fill="none") +
-  labs(title="ICC Heroic - 25 man",x="",y="Pulls",
+  labs(title="ICC Heroic - 25 man",x="",y="Encounters",
        caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; Discord: Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR</p>"),
        subtitle="Data from: 1,767 logs containing 25,911 heroic encounters")+
   scale_y_continuous(labels = scales::percent, 
@@ -649,7 +649,7 @@ plot_25_n_img <- magick::image_read("./_img/transition/plot_25_n.png")
 ## Final canvas
 
 ```{r} 
-canvas <- image_blank(width = 3600, height = 2425)
+canvas <- image_blank(width = 3600, height = 2420)
 
 
 canvas <- image_composite(canvas, plot_title_white, offset = "+0+0",operator = "over")
@@ -658,14 +658,10 @@ canvas <- image_composite(canvas, plot_title_2, offset = "+1150+0",operator = "o
 
 canvas <- image_composite(canvas,plot_25_h_img , offset = "+0+145",operator = "over")
 canvas <- image_composite(canvas,  plot_25_n_img, offset = "+1800+145",operator = "over")
-canvas <- image_composite(canvas, plot_10_h_img , offset = "+0+1240",operator = "over")
-canvas <- image_composite(canvas,plot_10_n_img  , offset = "+1800+1240",operator = "over")
+canvas <- image_composite(canvas, plot_10_h_img , offset = "+0+1245",operator = "over")
+canvas <- image_composite(canvas,plot_10_n_img  , offset = "+1800+1245",operator = "over")
+
 image_write(canvas, "./_img/final_image_25_10_wing_title.jpg")
-
-
-
-
-
 
 ```
 
