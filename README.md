@@ -18,6 +18,8 @@ Duplicated encounters were excluded based on: Average item level, duration of th
 
 <img src="_img/data_pipeline.jpg"/>
 
+The raw data file in data table ("Excel") format can be found in this repo: https://github.com/ForgeGit/ICC_PTR/blob/main/raw_data/ICC_PTR_clean_Data2023_09_03_h17_m18.csv
+
 ## Limitations
 
 a.k.a. Things to consider when interpreting this as "information"
@@ -34,6 +36,10 @@ a.k.a. Things to consider when interpreting this as "information"
 - PTR  means a portion of the players have either incomplete or scuffed UIs/macros/addons, making the overrall performance of the average player worse than what it actually is in live servers. Another group of the PTR players could also be testing specs and gear.
 
 - Raids in general are mostly testing the content, sometimes wiping on purpose or doing quick pulls "just to see the boss". 
+
+## Others
+
+- The image used for the Open Graph Card comes from: https://www.zerochan.net/230963
 
 ## Other analysis and random stuff
 
