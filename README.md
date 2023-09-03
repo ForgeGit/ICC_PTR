@@ -4,7 +4,7 @@ Data on the first PTR session for The Icecrown Citadel (ICC)
 
 ## Graphic (1)
 
-<img src="_img/final_image_25_10_wing_title.jpg"/>
+<img src="_img/final_image_25_10_wing.jpg"/>
 
 ## Methodology
 
