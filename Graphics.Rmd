@@ -297,7 +297,7 @@ ggsave("./_img/transition/plot_title.png",title,
 
 
 
-plot_title  <- magick::image_read("./plot_title.png")
+plot_title  <- magick::image_read("./_img/transition/plot_title.png")
 ###
 title <- ggplot()  +
     vivax_theme_title() + 
