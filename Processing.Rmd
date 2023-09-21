@@ -371,11 +371,43 @@ df_encounter_round1_final2 <- df_encounter_round1_final %>%
 # Save Data
 
 ```{r}
-df_encounter_round1_final2 %>% write.csv(paste0("./raw_data/ICC_PTR_clean_Data_1stround_CORRECTED_",
-                                                format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"))
+df_encounter_round1_final2 %>%
+  write.csv(paste0("./raw_data/viz/ICC_PTR_clean_Data_1stround_CORRECTED_",
+                   format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"), row.names = F)
 
-df_encounter_round2_final2 %>% write.csv(paste0("./raw_data/ICC_PTR_clean_Data_2ndround_",
-                                                format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"))
+df_encounter_round2_final2  %>% 
+  write.csv(paste0("./raw_data/viz/ICC_PTR_clean_Data_2ndround_",
+                   format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"), row.names = F)
+
+
+
+
+
+
+df_encounter_round1_final2 %>%
+  
+  select(-c(X,exclude,duration,completeRaid,fightPercentage,lastPhase,encounterNameColor,hardModeLevel)) %>% 
+  select(logID,fightID,encounterName,encounterID,size,difficulty,kill,duration_s,bossPercentage,averageItemLevel,startTime,endTime) %>% 
+  
+  mutate(link = paste0("https://classic.warcraftlogs.com/reports/",logID,"#fight=",fightID),
+         difficulty = ifelse(difficulty=="Hard","Heroic",difficulty)) %>%
+  
+  write.csv(paste0("./raw_data/ICC_PTR_clean_Data_1stround_",
+                   format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"), row.names = F)
+
+
+
+df_encounter_round2_final2 %>%
+  
+  select(-c(X,exclude,duration,completeRaid,fightPercentage,lastPhase,encounterNameColor,hardModeLevel)) %>% 
+  select(logID,fightID,encounterName,encounterID,size,difficulty,kill,duration_s,bossPercentage,averageItemLevel,startTime,endTime) %>% 
+  
+  mutate(link = paste0("https://classic.warcraftlogs.com/reports/",logID,"#fight=",fightID),
+         difficulty = ifelse(difficulty=="Hard","Heroic",difficulty))  %>% 
+  
+  write.csv(paste0("./raw_data/ICC_PTR_clean_Data_2ndround_",
+                   format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"), row.names = F)
+
 ```
 
 
