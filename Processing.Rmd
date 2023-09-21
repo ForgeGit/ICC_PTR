@@ -1,0 +1,388 @@
+---
+title: "Processing"
+output: html_document
+date: "2023-09-21"
+---
+
+# Database Processing and Download
+
+```{r}
+token <- Sys.getenv("TOKEN")
+```
+
+## + Queries 
+
+### - Request logs 
+
+```{r}
+request_logs_str <- '{
+    reportData {
+        reports(zoneID:%i
+                page:%i
+                ){
+                data {
+                    code
+                    startTime
+                    endTime
+                    }
+                  }
+                }
+                        }
+    '
+```
+
+### - Request encounters 
+
+```{r}
+request_encounter_str <- '{
+    reportData {
+        report(code: "%s") {
+            fights(killType: Encounters){
+            encounterID
+            difficulty
+            hardModeLevel
+            averageItemLevel
+            size
+            kill
+            lastPhase
+            startTime
+            endTime
+            fightPercentage
+            bossPercentage
+            completeRaid
+            id
+            }
+        }
+        }
+    }'
+
+```
+
+## + API req.
+
+```{r}
+#### Set-up API requests
+
+url <- "https://classic.warcraftlogs.com/api/v2"
+
+WCL_API2_request <- function(request) {
+  
+  request <- jsonlite::toJSON(list(query=request),
+                              auto_unbox=TRUE, 
+                              bigint_as_char=F) 
+  
+  response <- POST(url,
+                   add_headers("Content-Type" = "application/json",
+                               "Authorization"= paste0("Bearer ",
+                                                       token)),
+                   body = request,
+                   content_type_json(),
+                   encode = "json")
+  
+  response_formated <- fromJSON(content(response, 
+                                        as = "text",
+                                        encoding="UTF-8"), 
+                                bigint_as_char=TRUE)
+  
+  return(response_formated)
+}
+
+```
+
+# Get data
+
+## + Logs IDs
+
+```{r}
+request_logs_code <- sprintf(request_logs_str,1020, 1:25)
+
+response_logs_code <- lapply(seq_along(request_logs_code), function(i) {  
+  
+  response <- WCL_API2_request(request_logs_code[i]
+  )$data$reportData$reports$data
+  
+  if (i %% 5 == 0) {
+    cat("Processed", i, "out of", length(request_logs_code), "\n")
+  }
+  
+  return(response)
+})
+
+response_logs_code_df <- do.call(rbind, response_logs_code)
+
+write.csv(response_logs_code_df,paste0("response_logs_code_df__ICC_",format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"))
+```
+
+```{r}
+df1<-read.csv("./raw_data/0_download_round1/logID/response_logs_code_df_ICC2023_09_01_h19_m37.csv")
+df2<-read.csv("./raw_data/0_download_round1/logID/response_logs_code_df_ICC2023_09_01.csv")
+df3<-read.csv("./raw_data/0_download_round1/logID/response_logs_code_df_ICC2023_09_03_h04_m20.csv")
+```
+
+
+```{r}
+df_round1 <- bind_rows(df1,df2,df3) %>%
+  distinct(code, .keep_all = TRUE) %>%
+  mutate(startTime = as_datetime(as.POSIXct(startTime/1000, origin="1970-01-01")),
+         endTime = as_datetime(as.POSIXct(endTime/1000, origin="1970-01-01")),
+         logNote_1 = "Round 1")
+
+```
+
+
+```{r}
+
+df1 <- read.csv("./raw_data/0_download_round2/logID/response_logs_code_df_ICC_2023_09_17_h00_m17.csv")
+df2 <- read.csv("./raw_data/0_download_round2/logID/response_logs_code_df_ICC_2023_09_17_h15_m30.csv")
+df3 <- read.csv("./raw_data/0_download_round2/logID/response_logs_code_df_ICC2023_09_20_h03_m47.csv")
+df4 <- read.csv("./raw_data/0_download_round2/logID/response_logs_code_df_ICC2023_09_21_h03_m56.csv")
+
+df_round2<- bind_rows(df1,df2,df3,df4) %>%
+  distinct(code, .keep_all = TRUE) %>%
+  mutate(startTime = as_datetime(as.POSIXct(startTime/1000, origin="1970-01-01")),
+         endTime = as_datetime(as.POSIXct(endTime/1000, origin="1970-01-01")),
+         logNote_2 ="Round 2")
+
+
+
+df <- bind_rows(df_round1,df_round2) %>%
+  distinct(code, .keep_all = TRUE) %>%
+  mutate(logNote = ifelse(is.na(logNote_2) & logNote_1 == "Round 1","Round 1",
+                          ifelse(is.na(logNote_1)  &logNote_2=="Round 2","Round 2", "NA"))) %>%
+  select(-c(logNote_1,logNote_2))
+
+
+```
+
+## + Encounter Data
+
+```{r}
+logIDs <- unique(df_round2$code)
+
+request_encounter <- sprintf(request_encounter_str, logIDs)
+```
+
+
+```{r}
+response_formatted_list <- lapply(seq_along(request_encounter), function(i) {  
+  
+  response <- WCL_API2_request(request_encounter[i])$data$reportData$report$fights 
+  
+  if (i %% 50 == 0) {
+    cat("Processed", i, "out of", length(request_encounter), "\n")
+  }
+  
+  if(!is.null(response) & length(response)>0) {
+    
+    response <- mutate(response, 
+                       duration = endTime - startTime,  
+                       duration_s = duration/1000,
+                       logID = as.character(logIDs[i])
+    )
+    
+    response <- rename(response,fightID = id)
+    
+  } else {
+    response <- data.frame(logID = character(0),
+                           fightID=integer(0),
+                           encounterID=integer(0),
+                           difficulty =integer(0),
+                           hardModeLevel =integer(0),
+                           averageItemLevel =integer(0),
+                           size =integer(0),
+                           kill =character(0),
+                           lastPhase =integer(0),
+                           startTime=integer(0) ,
+                           endTime =integer(0),
+                           fightPercentage=integer(0) ,
+                           bossPercentage=integer(0) ,
+                           completeRaid =character(0),
+                           
+                           duration=integer(0)  ,
+                           duration_s=integer(0) 
+                           
+    )
+  }
+  return(response)
+})
+
+encounter_response_list<- response_formatted_list
+rm(response_formatted_list)
+encounter_data <- do.call(rbind, encounter_response_list)
+
+write.csv(encounter_data,paste0("./raw_data/0_download_round2/encounter_data_ICC_",format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"))
+```
+
+```{r}
+df_encounter_round2 <- read.csv("./raw_data/0_download_round2/encounter_data_ICC_2023_09_21_h06_m08.csv")
+df_encounter_round1 <- read.csv("./raw_data/0_download_round1/encounter_data_ICC2023_09_03_h04_m57.csv")
+```
+
+```{r}
+ICC_encounterIDs<- c(845,846,847,848,849,850,851,852,853,854,855,856)
+
+```
+
+
+
+```{r}
+df_encounter_round1_final2 %>%
+  group_by(logID) %>% 
+  summarise(n=n())
+
+c <- df_encounter_round2_final2 %>% 
+  group_by(logID) %>% 
+  summarise(n=n()) %>% arrange(desc(n))
+
+
+df_encounter_round2 %>% filter(encounterID==856 & kill==TRUE)
+
+
+```
+
+#### -Round 2
+
+```{r}
+df_encounter_round2_final <- df_encounter_round2 %>%
+  
+  mutate(encounterName = as.character(encounterID),
+         encounterName = case_when(encounterName == '845' ~ 'Marrowgar',
+                                   encounterName == '846' ~ 'LDW',
+                                   encounterName == '847' ~ 'Gunship',
+                                   encounterName == '848' ~ 'Saurfang',
+                                   encounterName == '849' ~ 'Festergut',
+                                   encounterName == '850' ~ 'Rotface',
+                                   encounterName == '851' ~ 'Putricide',
+                                   encounterName == '852' ~ 'Council',
+                                   encounterName == '853' ~ 'Queen',
+                                   encounterName == '854' ~ 'Dreamwalk.',
+                                   encounterName == '855' ~ 'Sindra',
+                                   encounterName == '856' ~ 'LK'
+                                   
+         ),
+         
+         
+         encounterNameColor = encounterName,
+         encounterNameColor = case_when(encounterNameColor ==  'Marrowgar'~ "<b><span style='color:#464646;'>Marrow</span></b>",
+                                        encounterNameColor ==  'LDW'~ "<b><span style='color:#464646;'>LDW</span></b>",
+                                        encounterNameColor == 'Gunship'~ "<b><span style='color:#464646;'>Gunship</span></b>",
+                                        encounterNameColor == 'Saurfang'~ "<b><span style='color:#464646;'>Saurfang</span></b>",
+                                        encounterNameColor == 'Festergut' ~ "<b><span style='color:#397000;'>Festergut</span></b>",
+                                        encounterNameColor == 'Rotface' ~ "<b><span style='color:#397000;'>Rotface</span></b>",
+                                        encounterNameColor == 'Putricide' ~  "<b><span style='color:#397000;'>Putricide*</span></b>",
+                                        encounterNameColor ==  'Council'~  "<b><span style='color:#6D0027;'>Council</span></b>",
+                                        encounterNameColor ==  'Queen'~  "<b><span style='color:#6D0027;'>Queen</span></b>",
+                                        encounterNameColor == 'Dreamwalk.'~  "<b><span style='color:#040A54;'>Valithria</span></b>",
+                                        encounterNameColor ==  'Sindra'~  "<b><span style='color:#040A54;'>Sindra</span></b>",
+                                        encounterNameColor == 'LK'~  "<b><span style='color:#000000;'>LK</span></b>"
+                                        
+         ),
+         
+         difficulty = case_when(difficulty == "4" ~ "Hard",
+                                difficulty == "3" ~ "Normal"),
+         exclude = ifelse(encounterID==856 & bossPercentage==0.01 & kill!=T, "yes","no"),
+         kill = ifelse(encounterID==856 & bossPercentage<11, T, kill)
+  ) %>%
+  
+  filter(encounterID %in% ICC_encounterIDs & exclude !="yes") %>%
+  
+  distinct(encounterName,difficulty, size, kill, fightPercentage, 
+           duration, averageItemLevel, .keep_all = TRUE)
+
+
+df_encounter_round2_final2 <- df_encounter_round2_final %>%
+  mutate(duration_s_filter = round(duration_s,1)) %>%
+  
+  distinct(encounterName,difficulty, size, kill, fightPercentage, 
+           duration_s_filter, averageItemLevel, .keep_all = TRUE)
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+#### -Round 1
+
+```{r}
+df_encounter_round1_final <- df_encounter_round1 %>%
+  
+  mutate(encounterName = as.character(encounterID),
+         encounterName = case_when(encounterName == '845' ~ 'Marrowgar',
+                                   encounterName == '846' ~ 'LDW',
+                                   encounterName == '847' ~ 'Gunship',
+                                   encounterName == '848' ~ 'Saurfang',
+                                   encounterName == '849' ~ 'Festergut',
+                                   encounterName == '850' ~ 'Rotface',
+                                   encounterName == '851' ~ 'Putricide',
+                                   encounterName == '852' ~ 'Council',
+                                   encounterName == '853' ~ 'Queen',
+                                   encounterName == '854' ~ 'Dreamwalk.',
+                                   encounterName == '855' ~ 'Sindra',
+                                   encounterName == '856' ~ 'LK'
+                                   
+         ),
+         
+         
+         encounterNameColor = encounterName,
+         encounterNameColor = case_when(encounterNameColor ==  'Marrowgar'~ "<b><span style='color:#464646;'>Marrow</span></b>",
+                                        encounterNameColor ==  'LDW'~ "<b><span style='color:#464646;'>LDW</span></b>",
+                                        encounterNameColor == 'Gunship'~ "<b><span style='color:#464646;'>Gunship</span></b>",
+                                        encounterNameColor == 'Saurfang'~ "<b><span style='color:#464646;'>Saurfang</span></b>",
+                                        encounterNameColor == 'Festergut' ~ "<b><span style='color:#397000;'>Festergut</span></b>",
+                                        encounterNameColor == 'Rotface' ~ "<b><span style='color:#397000;'>Rotface</span></b>",
+                                        encounterNameColor == 'Putricide' ~  "<b><span style='color:#397000;'>Putricide*</span></b>",
+                                        encounterNameColor ==  'Council'~  "<b><span style='color:#6D0027;'>Council</span></b>",
+                                        encounterNameColor ==  'Queen'~  "<b><span style='color:#6D0027;'>Queen</span></b>",
+                                        encounterNameColor == 'Dreamwalk.'~  "<b><span style='color:#040A54;'>Valithria</span></b>",
+                                        encounterNameColor ==  'Sindra'~  "<b><span style='color:#040A54;'>Sindra</span></b>",
+                                        encounterNameColor == 'LK'~  "<b><span style='color:#000000;'>LK</span></b>"
+                                        
+         ),
+         
+         difficulty = case_when(difficulty == "4" ~ "Hard",
+                                difficulty == "3" ~ "Normal"),
+         exclude = ifelse(encounterID==856 & bossPercentage==0.01 & kill!=T, "yes","no"),
+         kill = ifelse(encounterID==856 & bossPercentage<11, T, kill)
+  ) %>%
+  
+  filter(encounterID %in% ICC_encounterIDs & exclude !="yes") %>%
+  
+  distinct(encounterName,difficulty, size, kill, fightPercentage, 
+           duration, averageItemLevel, .keep_all = TRUE)
+
+
+df_encounter_round1_final2 <- df_encounter_round1_final %>%
+  mutate(duration_s_filter = round(duration_s,1)) %>%
+  
+  distinct(encounterName,difficulty, size, kill, fightPercentage, 
+           duration_s_filter, averageItemLevel, .keep_all = TRUE)
+
+```
+
+
+# Save Data
+
+```{r}
+df_encounter_round1_final2 %>% write.csv(paste0("./raw_data/ICC_PTR_clean_Data_1stround_CORRECTED_",
+                                                format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"))
+
+df_encounter_round2_final2 %>% write.csv(paste0("./raw_data/ICC_PTR_clean_Data_2ndround_",
+                                                format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"))
+```
+
+
+
+
+
+
+
+
+
