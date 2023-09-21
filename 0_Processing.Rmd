@@ -131,7 +131,6 @@ df_round1 <- bind_rows(df1,df2,df3) %>%
 
 
 ```{r}
-
 df1 <- read.csv("./raw_data/0_download_round2/logID/response_logs_code_df_ICC_2023_09_17_h00_m17.csv")
 df2 <- read.csv("./raw_data/0_download_round2/logID/response_logs_code_df_ICC_2023_09_17_h15_m30.csv")
 df3 <- read.csv("./raw_data/0_download_round2/logID/response_logs_code_df_ICC2023_09_20_h03_m47.csv")
@@ -297,16 +296,6 @@ df_encounter_round2_final2 <- df_encounter_round2_final %>%
            duration_s_filter, averageItemLevel, .keep_all = TRUE)
 
 
-
-
-
-
-
-
-
-
-
-
 ```
 
 #### -Round 1
@@ -375,12 +364,17 @@ df_encounter_round1_final2 %>%
   write.csv(paste0("./raw_data/viz/ICC_PTR_clean_Data_1stround_CORRECTED_",
                    format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"), row.names = F)
 
-df_encounter_round2_final2  %>% 
+
+
+df_round2 %>% rename(logID = code, starTimeLog=startTime, endTimeLog=endTime) %>% select(-c(X)) %>%
+  
+  filter(endTimeLog >= "2023-09-10") %>% 
+  
+  left_join(df_encounter_round2_final2,
+            by=c("logID")) %>%
+  
   write.csv(paste0("./raw_data/viz/ICC_PTR_clean_Data_2ndround_",
                    format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"), row.names = F)
-
-
-
 
 
 
@@ -397,7 +391,13 @@ df_encounter_round1_final2 %>%
 
 
 
-df_encounter_round2_final2 %>%
+
+df_round2 %>% rename(logID = code, starTimeLog=startTime, endTimeLog=endTime) %>% select(-c(X)) %>%
+  
+  filter(endTimeLog >= "2023-09-10") %>% 
+  
+  left_join(df_encounter_round2_final2,
+            by=c("logID"))%>%
   
   select(-c(X,exclude,duration,completeRaid,fightPercentage,lastPhase,encounterNameColor,hardModeLevel)) %>% 
   select(logID,fightID,encounterName,encounterID,size,difficulty,kill,duration_s,bossPercentage,averageItemLevel,startTime,endTime) %>% 
