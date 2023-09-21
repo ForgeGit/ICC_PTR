@@ -268,7 +268,7 @@ df_encounter_round2_final <- df_encounter_round2 %>%
                                         encounterNameColor == 'Saurfang'~ "<b><span style='color:#464646;'>Saurfang</span></b>",
                                         encounterNameColor == 'Festergut' ~ "<b><span style='color:#397000;'>Festergut</span></b>",
                                         encounterNameColor == 'Rotface' ~ "<b><span style='color:#397000;'>Rotface</span></b>",
-                                        encounterNameColor == 'Putricide' ~  "<b><span style='color:#397000;'>Putricide*</span></b>",
+                                        encounterNameColor == 'Putricide' ~  "<b><span style='color:#397000;'>Putricide</span></b>",
                                         encounterNameColor ==  'Council'~  "<b><span style='color:#6D0027;'>Council</span></b>",
                                         encounterNameColor ==  'Queen'~  "<b><span style='color:#6D0027;'>Queen</span></b>",
                                         encounterNameColor == 'Dreamwalk.'~  "<b><span style='color:#040A54;'>Valithria</span></b>",
@@ -280,7 +280,7 @@ df_encounter_round2_final <- df_encounter_round2 %>%
          difficulty = case_when(difficulty == "4" ~ "Hard",
                                 difficulty == "3" ~ "Normal"),
          exclude = ifelse(encounterID==856 & bossPercentage==0.01 & kill!=T, "yes","no"),
-         kill = ifelse(encounterID==856 & bossPercentage<11, T, kill)
+         kill = ifelse(encounterID==856 & bossPercentage<11 & bossPercentage>=0.01, T, kill)
   ) %>%
   
   filter(encounterID %in% ICC_encounterIDs & exclude !="yes") %>%
