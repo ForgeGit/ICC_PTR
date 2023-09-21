@@ -22,7 +22,7 @@ All wipes with Lich King at 10% or less HP were considered as kills; wipes at 0%
 
 Duplicated encounters were excluded based on: "Encounter Name", "Difficulty", "Size", "Kill/Wipe", "Boss %", "Fight Length", and "Avg. ilvl"
 
-<img src="_img/data_pipeline.jpg"/>
+<img src="_img/data_pipeline_2.jpg"/>
 
 The raw data file in data table ("Excel") format can be found in this repo: https://github.com/ForgeGit/ICC_PTR/blob/main/raw_data/ICC_PTR_clean_Data_1stround_2023_09_21_h16_m11.csv
 
