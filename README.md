@@ -54,3 +54,6 @@ General PTR limitations to consider:
 
 - Check other things I have done here: https://github.com/ForgeGit?tab=repositories
 
+## Changelog
+
+- The data for the 1st round of PTR had some duplicated logs that were not "filtered" as explained in the Methodology section. I have adjusted the filter and this has resulted in less # of encounters. The change does not impact the overall results or interpretations of the graphic. The old version (Version 1) can now be found at: https://github.com/ForgeGit/ICC_PTR/tree/main/_img/old_v
