@@ -939,3 +939,26 @@ canvas <- image_composite(canvas,plot_ridge_10_n_img  , offset = "+1800+1245",op
 image_write(canvas, "./_img/ICCPTR_2ndSession_v2_10m.png")
 
 ```
+
+
+
+```{r}
+a <- df_final %>% filter(encounterID==856 & kill==T)
+```
+
+
+## Full clears
+
+```{r}
+df<- read.csv("./raw_data/ICC_PTR_clean_Data_2ndround_2023_09_21_h20_m04.csv")
+              
+df %>% select(logID,encounterName,size,kill) %>% filter(!is.na(encounterName)) %>%
+  pivot_wider(names_from = encounterName, values_from = kill) %>%
+  mutate_at(c(3:14), ~paste0(.))  %>%
+  mutate_at(c(3:14), ~ifelse(.=="NULL",0,1)) %>%
+  
+  mutate(sum_AB = rowSums(select(.,3:14))) %>%
+  filter(sum_AB >=9) %>% write.csv("full_PTR_ICC.csv")
+
+```
+
