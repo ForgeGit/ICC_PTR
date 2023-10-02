@@ -32,11 +32,15 @@ All wipes with Lich King at 10% or less HP were considered as kills; wipes at 0%
 
 Duplicated encounters were excluded based on: "Encounter Name", "Difficulty", "Size", "Kill/Wipe", "Boss %", "Fight Length", and "Avg. ilvl"
 
-<img src="_img/data_pipeline_2.jpg"/>
+<img src="_img/data_pipeline_3.jpg"/>
 
-The raw data file in data table ("Excel") format can be found in this repo: https://github.com/ForgeGit/ICC_PTR/blob/main/raw_data/ICC_PTR_clean_Data_1stround_2023_09_21_h16_m11.csv
+The raw data file in data table ("Excel") format can be found in this repo: 
 
-The file used for the graphics (which contains the same data as the link above), can be found in:  https://github.com/ForgeGit/ICC_PTR/blob/main/raw_data/viz/ICC_PTR_clean_Data_1stround_CORRECTED_2023_09_21_h16_m11.csv
+- Round 1: https://github.com/ForgeGit/ICC_PTR/blob/main/raw_data/ICC_PTR_clean_Data_1stround_2023_09_21_h16_m11.csv
+- Round 2: https://github.com/ForgeGit/ICC_PTR/blob/main/raw_data/ICC_PTR_clean_Data_2ndround_2023_09_21_h20_m04.csv
+- Round 3: https://github.com/ForgeGit/ICC_PTR/blob/main/raw_data/ICC_PTR_clean_Data_3rdround_2023_09_30_h08_m13.csv
+
+The file used for the graphics (which contains the same data as the links above), can be found in: https://github.com/ForgeGit/ICC_PTR/tree/main/raw_data/viz
 
 ## Limitations
 
@@ -73,3 +77,19 @@ General PTR limitations to consider:
 ## Changelog
 
 - The data for the 1st round of PTR had some duplicated logs that were not "filtered" as explained in the Methodology section. I have adjusted the filter and this has resulted in less # of encounters. The change does not impact the overall results or interpretations of the graphic. The old version (Version 1) can now be found at: https://github.com/ForgeGit/ICC_PTR/tree/main/_img/old_v
+
+## Others 2?
+
+These are some Youtube videos/media in which the PTR data has been used, that I am aware of.
+
+I do not necessarily support or agree with the statement in the videos or their authors. However, I appreciate them mentioning and giving it an use.
+
+- Will Heroic Lich King be Cleared on Launch?
+    - Shindigg
+    - https://www.youtube.com/watch?v=9rC5LF-etoY
+
+- Discover the Best Healers in Wotlk Phase 4 - Healers Tier List
+    - NOHITJEROME
+    - https://www.youtube.com/watch?v=MIO2kJxZ4Jo
+    
+If you know of any other platform/website/media in which my graphics have been used, let me know to spotlight them in here. 
