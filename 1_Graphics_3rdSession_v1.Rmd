@@ -1,0 +1,1677 @@
+---
+title: "ICC PTR Data"
+output: html_document
+date: "2023-09-03"
+---
+
+# Config
+
+## -Libraries 
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+
+options(scipen = 100)
+options(Encoding="UTF-8")
+#install.packages("viridis")  # Install
+#install.packages(c("httr", "jsonlite","tidyverse","gtsummary","gghighlight"))
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(gtsummary)
+library(gghighlight)
+library(png)
+library(grid)
+library("viridis") 
+library(ggplot2)
+library(showtext)
+#> Loading required package: sysfonts
+#> Loading required package: showtextdb
+library(ggrepel)
+library(cowplot)
+library(ggtext)
+library(extrafont)
+library(scales)
+library(ggridges)
+library(ggpubr)
+library(magick)
+```
+
+## -Utils 
+
+```{r}
+scale_factor = 2.65
+
+# ` variable name `     |n      or | or \ Symbol on Keyboard
+#"forge-"    
+#e901 github
+#e900 discord
+font_add(family = "forgefooter", "forgefooter.ttf")
+font_import()
+n
+showtext_auto(TRUE)
+```
+
+## -Themes
+
+```{r}
+scale_factor = 2.65
+
+vivax_theme <- function() {
+  theme_bw() +
+    
+    theme(axis.title.x = element_text(size = scale_factor * 13),
+          axis.title.y = element_text(size = scale_factor * 13),
+          plot.title = element_markdown(face = "bold",
+                                        size = scale_factor * 16,
+                                        hjust = 0, 
+                                        margin = margin(b = -1)),
+          plot.subtitle = element_markdown(face="italic",
+                                           size = scale_factor * 12,
+                                           lineheight=0.3, 
+                                        margin = margin(b = 0.5)),
+          plot.caption = element_markdown(face = "italic",
+                                          hjust = 0,
+                                          vjust=1,
+                                          size = scale_factor * 8,
+                                          lineheight=0.3,
+                                          margin = margin(t = -10, unit = "pt")),
+          legend.position = c(0.26, 0.8),
+          legend.spacing.x = unit(1, "pt"),
+          legend.spacing.y = unit(0.5, "pt"),
+          legend.direction="horizontal",
+          legend.box.just = "left",
+          legend.title = element_text(size=scale_factor*13),
+          legend.text = element_text(size = scale_factor * 11,
+                                     lineheight=0.5),
+          #  legend.background = element_rect(fill = "transparent"),
+          axis.text = element_markdown(size= scale_factor * 10),
+          strip.text.x = element_text(size = scale_factor * 12),
+          legend.background = element_rect(fill = alpha('white', 0.4)),
+          axis.text.x = element_markdown(size= scale_factor * 10,
+                                         angle=45,hjust=1,
+                                         margin = margin(t = -1, unit = "pt")),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank()
+    )
+}
+
+vivax_theme_title <- function() {
+  theme_bw() +
+    
+    theme(axis.title.x = element_text(size = scale_factor * 13),
+          axis.title.y = element_text(size = scale_factor * 13),
+          plot.title = element_markdown(face = "bold",
+                                        size = scale_factor * 17,
+                                        hjust = 0,
+                                        lineheight=0.3),
+          plot.subtitle = element_markdown(face="italic",
+                                           size = scale_factor * 13,
+                                           lineheight=0.3),
+          plot.caption = element_markdown(face = "italic",
+                                          hjust = 0,
+                                          vjust=1,
+                                          size = scale_factor * 8,
+                                          lineheight=c(0.5,0,0.75),
+                                          margin = margin(t = -10, unit = "pt")),
+          legend.position = c(0.26, 0.8),
+          legend.spacing.x = unit(1, "pt"),
+          legend.spacing.y = unit(0.5, "pt"),
+          legend.direction="horizontal",
+          legend.box.just = "left",
+          legend.title = element_text(size=scale_factor*13),
+          legend.text = element_text(size = scale_factor * 11,
+                                     lineheight=0.5),
+          #  legend.background = element_rect(fill = "transparent"),
+          axis.text = element_markdown(size= scale_factor * 10),
+          strip.text.x = element_text(size = scale_factor * 12),
+          legend.background = element_rect(fill = alpha('white', 0.4)),
+          axis.text.x = element_markdown(size= scale_factor * 10,
+                                         angle=45,hjust=1,
+                                          margin = margin(t = -1, unit = "pt"))
+          )
+}
+
+
+
+vivax_theme_v3 <- function() {
+  theme_bw() +
+    
+    theme(axis.title.x = element_text(size = scale_factor * 13),
+          axis.title.y = element_text(size = scale_factor * 13),
+          plot.title = element_markdown(face = "bold",
+                                        size = scale_factor * 16,
+                                        hjust = 0, 
+                                        margin = margin(b = 0.5)),
+          plot.subtitle = element_markdown(face="italic",
+                                           size = scale_factor * 12,
+                                           lineheight=0.3, 
+                                        margin = margin(b = 0.5)),
+          plot.caption = element_markdown(face = "italic",
+                                          hjust = 0,
+                                          vjust=1,
+                                          size = scale_factor * 8,
+                                          lineheight=0.3,
+                                          margin = margin(t = -10, unit = "pt")),
+          legend.position = c(0.26, 0.8),
+          legend.spacing.x = unit(1, "pt"),
+          legend.spacing.y = unit(0.5, "pt"),
+          legend.direction="horizontal",
+          legend.box.just = "left",
+          legend.title = element_text(size=scale_factor*13),
+          legend.text = element_text(size = scale_factor * 11,
+                                     lineheight=0.5),
+          #  legend.background = element_rect(fill = "transparent"),
+          axis.text = element_markdown(size= scale_factor * 10),
+          strip.text.x = element_text(size = scale_factor * 12),
+          legend.background = element_rect(fill = alpha('white', 0.4)),
+          axis.text.x = element_markdown(size= scale_factor * 10,
+                                         angle=45,hjust=1,
+                                         margin = margin(t = -1, unit = "pt")),
+          axis.text.y = element_markdown(size= scale_factor * 10),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank()
+    )
+}
+
+```
+
+
+# Data
+
+## +Load
+
+```{r}
+df_final <- read.csv("./raw_data/viz/ICC_PTR_clean_Data_3rdround_2023_09_30_h08_m12.csv")  %>%
+  filter(logID!="tMhBXwN21zLWKq4A" & startTime!=4968514) %>%
+  
+  filter( !(encounterName == "Gunship" & duration_s >= 430 ))
+
+
+df_final <- df_final %>%
+  ### Color
+  mutate(encounterName = encounterNameColor )
+
+
+df_final_10m <- df_final %>%
+  filter(size==10)
+
+
+df_final_25m <- df_final %>%
+  filter(size==25)
+```
+
+
+## +Format 25m
+
+```{r} 
+### Wide
+order_25_wide <- df_final_25m %>% 
+  
+  group_by(encounterName,kill,difficulty) %>% 
+  
+  summarise(n=n()) %>%
+  
+  ungroup() %>%
+  
+  mutate(kill=as.character(kill)) %>%
+  
+  pivot_wider(names_from=kill,values_from=n) %>%
+  
+  rename(Wipes=`FALSE`,
+         Kills=`TRUE`) %>% 
+  
+  mutate(Kills = ifelse(is.na(Kills),0,Kills),
+         pulls =  Wipes + Kills,
+         per_kill = Kills / pulls, 
+         per_wipe =  Wipes / pulls,
+         ratio = ifelse(per_wipe==1,"-",paste0(as.character(round(Wipes/Kills)),":1")))
+
+
+
+### Long
+order_25_long <- order_25_wide  %>%
+  
+  select(encounterName,Wipes,Kills,pulls,difficulty,ratio ) %>%
+  
+  pivot_longer(cols=Wipes:Kills,
+               names_to = "Result", 
+               values_to = "n") %>%
+  
+  mutate(per_result = n/pulls,
+         position = 1.1)
+
+order_25_long_hm <- order_25_long %>%  
+  filter(difficulty=="Hard" & Result=="Kills") %>% 
+  arrange(desc(per_result)) %>%
+  select(encounterName) %>% pull(.)
+
+order_25_long_norm <- order_25_long %>%  
+  filter(difficulty=="Normal" & Result=="Kills") %>% 
+  arrange(desc(per_result)) %>%
+  select(encounterName) %>% pull(.)
+```
+
+## +Format 10m
+```{r} 
+### Wide
+order_10_wide <- df_final_10m  %>%
+  
+  group_by(encounterName,kill,difficulty) %>% 
+  
+  summarise(n=n()) %>%
+  
+  ungroup() %>%
+  
+  mutate(kill=as.character(kill)) %>%
+  
+  pivot_wider(names_from=kill,values_from=n) %>%
+  
+  rename(Wipes=`FALSE`,
+         Kills=`TRUE`) %>% 
+  
+  mutate(Kills = ifelse(is.na(Kills),0,Kills),
+         pulls =  Wipes + Kills,
+         per_kill = Kills / pulls, 
+         per_wipe =  Wipes / pulls,
+         ratio = ifelse(per_wipe==1,"-",paste0(as.character(round(Wipes/Kills)),":1")))
+
+
+
+### Long
+order_10_long <- order_10_wide  %>%
+  
+  select(encounterName,Wipes,Kills,pulls,difficulty,ratio) %>%
+  
+  pivot_longer(cols=Wipes:Kills,
+               names_to = "Result", 
+               values_to = "n") %>%
+  
+  mutate(per_result = n/pulls,
+         position = 1.1)
+
+order_10_long_hm <- order_10_long %>%  
+  filter(difficulty=="Hard" & Result=="Kills") %>% 
+  arrange(desc(per_result)) %>%
+  select(encounterName) %>% pull(.)
+
+order_10_long_norm <- order_10_long %>%  
+  filter(difficulty=="Normal" & Result=="Kills") %>% 
+  arrange(desc(per_result)) %>%
+  select(encounterName) %>% pull(.)
+```
+
+## +Extras
+
+### *Boss order
+
+```{r}
+boss_order_wing <- c(
+  "<b><span style='color:#464646;'>Marrow</span></b>" ,  
+  "<b><span style='color:#464646;'>LDW</span></b>"  ,    
+  "<b><span style='color:#464646;'>Gunship</span></b>" , 
+  "<b><span style='color:#464646;'>Saurfang</span></b>" , 
+  "<b><span style='color:#397000;'>Rotface</span></b>"  ,
+  "<b><span style='color:#397000;'>Festergut</span></b>" ,
+  "<b><span style='color:#397000;'>Putricide</span></b>",
+  "<b><span style='color:#6D0027;'>Council</span></b>" , 
+  "<b><span style='color:#6D0027;'>Queen</span></b>"  ,
+  "<b><span style='color:#040A54;'>Valithria</span></b>", 
+  "<b><span style='color:#040A54;'>Sindra</span></b>",  
+  "<b><span style='color:#000000;'>LK</span></b>" 
+)
+```
+
+
+
+# Title segment
+
+```{r} 
+###
+title <- ggplot() +
+    vivax_theme_title() + 
+  labs(title="<p> Icecrown Citadel (ICC) Third PTR <br><b><span style='color:#006CD1;'>Kills</span></b> and <b><span style='color:#994F00;'>Wipes</span></b></p>",
+       subtitle="<p>  </p>") +                                                   # Remove grid, color & borders
+  theme(axis.line = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
+
+
+
+ggsave("./_img/transition/plot_title.png",title, 
+       width = 12, height =4,units="in",device = "png",dpi=300)
+
+
+
+plot_title  <- magick::image_read("./_img/transition/plot_title.png")
+###
+title <- ggplot()  +
+    vivax_theme_title() + 
+  labs(title="",
+       subtitle="<p>Data from publicly uploaded logs to Warcraft Logs Classic from Sep 26 2023 22:30 to Sep 30 2023 02:00<br> <b><span style='color:#464646;'>Lower Spire</span>, <span style='color:#397000;'>Plague</span>, <span style='color:#6D0027;'>Blood</span></b> and <b><span style='color:#040A54;'>Frost</span></b> wing bosses + <b>The Frozen Throne (Lich King)</b></p>") +                                                   # Remove grid, color & borders
+  theme(axis.line = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
+
+
+
+ggsave("./_img/transition/plot_subtitle.png",title, 
+       width = 12, height =4,units="in",device = "png",dpi=300)
+
+
+
+plot_title_2  <- magick::image_read("./_img/transition/plot_subtitle.png")
+
+###
+title <- ggplot()  +
+    vivax_theme_title() + 
+  labs(title="",
+       subtitle="") +                                                   # Remove grid, color & borders
+  theme(axis.line = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
+
+
+
+ggsave("./_img/transition/plot_title_white.png",title, 
+       width = 12, height =4,units="in",device = "png",dpi=300)
+
+
+
+plot_title_white  <- magick::image_read("./_img/transition/plot_title_white.png")
+```
+
+
+# Bar Plots
+
+### 10m plots
+
+```{r} 
+plot_10_h <- ggplot(order_10_long %>% 
+                      filter(difficulty=="Hard") %>%
+                      mutate(encounterName=factor(encounterName,
+                                                  levels=boss_order_wing)), 
+                    aes(fill = Result, 
+                        y = per_result, 
+                        x = encounterName)) + 
+  geom_bar(position="fill", stat="identity") +
+  
+  geom_text(aes(label = ifelse(Result=="Kills", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=1.06, lineheight = .225,
+            size= scale_factor*3.5, color="#006CD1", fontface = "bold"
+  ) +
+  
+  geom_text(aes(label = ifelse(Result=="Wipes", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=-0.06, lineheight = .225,
+            size= scale_factor*3.5, color="#994F00", fontface = "bold"
+  )+
+  
+  geom_text(aes(label = ratio),
+            y=1.155, lineheight = .225,
+            size= scale_factor*3.5, color="black", fontface = "italic"
+  ) +
+  
+  scale_fill_manual(values=c("#006CD1","#994F00"))+
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="<p>ICC Heroic - 10 man </p>",x="",y="",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; discord.gg/wp55kqmyYG - Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR</p>"),
+       subtitle="Data from: 880 logs containing 12,936 heroic encounters")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(-0.1,1.16),
+                     breaks = seq(0,1,by=0.25))+
+  annotate(
+    x = -Inf, y = -0.075, 
+    label = "Wipes-", geom = "text",
+    color = "#994F00",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.075, 
+    label = "Kills-", geom = "text",
+    color = "#006CD1",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.155, 
+    label = "Wipes:Kill-", geom = "text",
+    color = "black",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  coord_cartesian(clip = "off")+
+  geom_vline(xintercept=4.5)+
+  geom_vline(xintercept=7.5)+
+  geom_vline(xintercept=9.5)+
+  geom_vline(xintercept=11.5)+ 
+  geom_hline(yintercept=0.5, linetype="dashed",size=0.25)+ 
+  geom_hline(yintercept=0.25, linetype="dotted",size=0.25)+ 
+  geom_hline(yintercept=0.75, linetype="dotted",size=0.25)
+
+
+plot_10_n <- ggplot(order_10_long %>% 
+                      filter(difficulty=="Normal") %>%
+                      mutate(encounterName=factor(encounterName,
+                                                  levels=boss_order_wing)), 
+                    aes(fill = Result, 
+                        y = per_result, 
+                        x = encounterName))  + 
+  geom_bar(position="fill", stat="identity") +
+  
+  geom_text(aes(label = ifelse(Result=="Kills", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=1.06, lineheight = .225,
+            size= scale_factor*3.5, color="#006CD1", fontface = "bold"
+  ) +
+  
+  geom_text(aes(label = ifelse(Result=="Wipes", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=-0.06, lineheight = .225,
+            size= scale_factor*3.5, color="#994F00", fontface = "bold"
+  ) +
+  
+  geom_text(aes(label = ratio),
+            y=1.155, lineheight = .225,
+            size= scale_factor*3.5, color="black", fontface = "italic"
+  ) +
+  scale_fill_manual(values=c("#006CD1","#994F00"))+
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="ICC Normal - 10 man",x="",y=" ",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; discord.gg/wp55kqmyYG - Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR</p>"),
+       subtitle="Data from: 508 logs containing 3,422 normal encounters")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(-0.1,1.16),
+                     breaks = seq(0,1,by=0.25)) +
+  annotate(
+    x = -Inf, y = -0.075, 
+    label = "Wipes-", geom = "text",
+    color = "#994F00",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.075, 
+    label = "Kills-", geom = "text",
+    color = "#006CD1",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.155, 
+    label = "Wipes:Kill-", geom = "text",
+    color = "black",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  coord_cartesian(clip = "off")+
+  geom_vline(xintercept=4.5)+
+  geom_vline(xintercept=7.5)+
+  geom_vline(xintercept=9.5)+
+  geom_vline(xintercept=11.5)+ 
+  geom_hline(yintercept=0.5, linetype="dashed",size=0.25)+ 
+  geom_hline(yintercept=0.25, linetype="dotted",size=0.25)+ 
+  geom_hline(yintercept=0.75, linetype="dotted",size=0.25)
+
+
+ggsave("./_img/transition/plot_10_h.png",plot_10_h, 
+       width = 6, height =4,units="in",device = "png",dpi=300)
+
+
+ggsave("./_img/transition/plot_10_n.png",plot_10_n, 
+       width = 6, height =4,units="in",device = "png",dpi=300)
+
+plot_10_h_img <- magick::image_read("./_img/transition/plot_10_h.png")
+plot_10_n_img <- magick::image_read("./_img/transition/plot_10_n.png")
+```
+
+
+### 25m plots
+```{r} 
+###
+plot_25_h <- ggplot(order_25_long %>% 
+                      filter(difficulty=="Hard") %>%
+                      mutate(encounterName=factor(encounterName,
+                                                  levels=boss_order_wing)), 
+                    aes(fill = Result, 
+                        y = per_result, 
+                        x = encounterName)) + 
+  geom_bar(position="fill", stat="identity") +
+  
+  geom_text(aes(label = ifelse(Result=="Kills", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=1.06, lineheight = .225,
+            size= scale_factor*3.5, color="#006CD1", fontface = "bold"
+  ) +
+  
+  geom_text(aes(label = ifelse(Result=="Wipes", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=-0.06, lineheight = .225,
+            size= scale_factor*3.5, color="#994F00", fontface = "bold"
+  )+
+  
+  geom_text(aes(label = ratio),
+            y=1.155, lineheight = .225,
+            size= scale_factor*3.5, color="black", fontface = "italic"
+  ) +
+  
+  scale_fill_manual(values=c("#006CD1","#994F00"))+
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="ICC Heroic - 25 man",x="",y="",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; Discord: Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR</p>"),
+       subtitle="Data from: 1,895 logs containing 23,095 heroic encounters")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(-0.1,1.16),
+                     breaks = seq(0,1,by=0.25))+
+  annotate(
+    x = -Inf, y = -0.075, 
+    label = "Wipes-", geom = "text",
+    color = "#994F00",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.075, 
+    label = "Kills-", geom = "text",
+    color = "#006CD1",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.155, 
+    label = "Wipes:Kill-", geom = "text",
+    color = "black",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  coord_cartesian(clip = "off")+
+  geom_vline(xintercept=4.5)+
+  geom_vline(xintercept=7.5)+
+  geom_vline(xintercept=9.5)+
+  geom_vline(xintercept=11.5)+ 
+  geom_hline(yintercept=0.5, linetype="dashed",size=0.25)+ 
+  geom_hline(yintercept=0.25, linetype="dotted",size=0.25)+ 
+  geom_hline(yintercept=0.75, linetype="dotted",size=0.25)
+
+
+
+plot_25_n <- ggplot(order_25_long %>% 
+                      filter(difficulty=="Normal") %>%
+                      mutate(encounterName=factor(encounterName,
+                                                  levels=boss_order_wing)), 
+                    aes(fill = Result, 
+                        y = per_result, 
+                        x = encounterName))  + 
+  geom_bar(position="fill", stat="identity") +
+  
+  geom_text(aes(label = ifelse(Result=="Kills", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=1.06, lineheight = .225,
+            size= scale_factor*3.5, color="#006CD1", fontface = "bold"
+  ) +
+  
+  geom_text(aes(label = ifelse(Result=="Wipes", 
+                               paste0(round(per_result*100,1),"%","\n(",scales::comma(n,accuaracy=1),")"),"")),
+            y=-0.06, lineheight = .225,
+            size= scale_factor*3.5, color="#994F00", fontface = "bold"
+  ) +
+  
+  geom_text(aes(label = ratio),
+            y=1.155, lineheight = .225,
+            size= scale_factor*3.5, color="black", fontface = "italic"
+  ) +
+  scale_fill_manual(values=c("#006CD1","#994F00"))+
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="ICC Normal - 25 man",x="",y=" ",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; discord.gg/wp55kqmyYG - Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR</p>"),
+       subtitle="Data from: 1,369 logs containing 8,929 normal encounters")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(-0.1,1.16),
+                     breaks = seq(0,1,by=0.25)) +
+  annotate(
+    x = -Inf, y = -0.075, 
+    label = "Wipes-", geom = "text",
+    color = "#994F00",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.075, 
+    label = "Kills-", geom = "text",
+    color = "#006CD1",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  annotate(
+    x = -Inf, y = 1.155, 
+    label = "Wipes:Kill-", geom = "text",
+    color = "black",
+    lineheight = .6,
+    hjust = 1,
+    size = scale_factor*3.5
+  )+
+  coord_cartesian(clip = "off")+
+  geom_vline(xintercept=4.5)+
+  geom_vline(xintercept=7.5)+
+  geom_vline(xintercept=9.5)+
+  geom_vline(xintercept=11.5) + 
+  geom_hline(yintercept=0.5, linetype="dashed",size=0.25)+ 
+  geom_hline(yintercept=0.25, linetype="dotted",size=0.25)+ 
+  geom_hline(yintercept=0.75, linetype="dotted",size=0.25)
+
+ggsave("./_img/transition/plot_25_h.png",plot_25_h, 
+       width = 6, height =4,units="in",device = "png",dpi=300)
+
+
+ggsave("./_img/transition/plot_25_n.png",plot_25_n, 
+       width = 6, height =4,units="in",device = "png",dpi=300)
+
+plot_25_h_img <- magick::image_read("./_img/transition/plot_25_h.png")
+plot_25_n_img <- magick::image_read("./_img/transition/plot_25_n.png")
+```
+
+
+# Ridge Plots
+
+## 25m
+
+```{r}
+ridge_25m <-                            
+  df_final_25m %>%
+  mutate(encounterName=factor(encounterName,
+                              levels=boss_order_wing))
+
+
+
+ridge_25m_n <- 
+  
+  ridge_25m %>% 
+  filter(difficulty=="Normal") %>%
+  ggplot() +
+  
+  ggridges::geom_density_ridges(data= ridge_25m %>% filter(difficulty=="Normal" & kill==FALSE),
+                                aes(x = duration_s , y = encounterName), 
+                                fill="#994F00", 
+                                scale = 1, alpha =0.5,           
+                                stat = "binline", size = 0) +
+  ggridges::geom_density_ridges(data= ridge_25m %>% filter(difficulty=="Normal" & kill==TRUE),
+                                aes(x = duration_s , y = encounterName), 
+                                fill="#006CD1", 
+                                scale = 1, alpha =0.5,           
+                                stat = "binline", size=0)+
+  
+  scale_x_continuous(breaks =seq(0,900,60),
+                     labels = paste0(seq(0,900,60)/60,":00"),
+                    limits=c(0,900),
+                     expand = c(0, 0))+
+  
+  geom_vline(xintercept=seq(60,max(ridge_25m$duration_s),60),linetype="dotted",alpha=0.75) +
+
+  vivax_theme_v3() + 
+  
+  guides(fill="none")+
+  labs(title="Fight Length (ICC Normal - 25 man)",x="",y="",
+       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 21/09/2023 &#40;dd/mm/yyyy&#41; 13:00 UTC </p>"),
+       subtitle="Data from: 4,295 kills and 4,634 wipes")
+
+
+
+
+ggsave("./_img/transition/ridge_25m_n.png",ridge_25m_n, 
+       width = 6, height =4,units="in",device = "png",dpi=300)
+
+
+
+ridge_25m_h <- 
+  
+  ridge_25m %>% 
+  filter(difficulty=="Hard") %>%
+  ggplot() +
+  
+  ggridges::geom_density_ridges(data= ridge_25m %>% filter(difficulty=="Hard" & kill==FALSE),
+                                aes(x = duration_s , y = encounterName), 
+                                fill="#994F00", 
+                                scale = 1, alpha =0.5,           
+                                stat = "binline", size = 0) +
+  ggridges::geom_density_ridges(data= ridge_25m %>% filter(difficulty=="Hard" & kill==TRUE),
+                                aes(x = duration_s , y = encounterName), 
+                                fill="#006CD1", 
+                                scale = 1, alpha =0.5,           
+                                stat = "binline", size=0)+
+  
+  scale_x_continuous(breaks =seq(0,900,60),
+                     labels = paste0(seq(0,900,60)/60,":00"),
+                    limits=c(0,900),
+                     expand = c(0, 0))+
+  
+  geom_vline(xintercept=seq(60,max(ridge_25m$duration_s),60),linetype="dotted",alpha=0.75) +
+
+  vivax_theme_v3() + 
+  
+  guides(fill="none")+
+  labs(title="Fight Length (ICC Heroic - 25 man)",x="",y="",
+       caption=c("<p> Support: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> Last Update: 21/09/2023 &#40;dd/mm/yyyy&#41; 14:00 UTC </p>"),
+       subtitle="Data from: 3,186 kills and 19,909 wipes")
+
+
+
+
+ggsave("./_img/transition/ridge_25m_h.png",ridge_25m_h, 
+       width = 6, height =4,units="in",device = "png",dpi=300)
+
+```
+
+## 10m
+
+```{r}
+ridge_10m <-                            
+  df_final_10m %>%
+  mutate(encounterName=factor(encounterName,
+                              levels=boss_order_wing))
+
+
+
+ridge_10m_n <- 
+  
+  ridge_10m %>% 
+  filter(difficulty=="Normal") %>%
+  ggplot() +
+  
+  ggridges::geom_density_ridges(data= ridge_10m %>% filter(difficulty=="Normal" & kill==FALSE),
+                                aes(x = duration_s , y = encounterName), 
+                                fill="#994F00", 
+                                scale = 1, alpha =0.5,           
+                                stat = "binline", size = 0) +
+  ggridges::geom_density_ridges(data= ridge_10m %>% filter(difficulty=="Normal" & kill==TRUE),
+                                aes(x = duration_s , y = encounterName), 
+                                fill="#006CD1", 
+                                scale = 1, alpha =0.5,           
+                                stat = "binline", size=0)+
+  
+  scale_x_continuous(breaks =seq(0,max(ridge_10m$duration_s),60),
+                     labels = paste0(seq(0,max(ridge_10m$duration_s),60)/60,":00"),
+                    limits=c(0,840),
+                     expand = c(0, 0))+
+  
+  geom_vline(xintercept=seq(60,max(ridge_10m$duration_s),60),linetype="dotted",alpha=0.75) +
+
+  vivax_theme_v3() + 
+  
+  guides(fill="none")+
+  labs(title="Fight Length (ICC Normal - 10 man)",x="",y="",
+       caption=c("<p> Support: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> Last Update: 21/09/2023 &#40;dd/mm/yyyy&#41; 14:00 UTC </p>"),
+       subtitle="Data from: 1,718 kills and 1,704 wipes")
+
+
+
+
+ggsave("./_img/transition/ridge_10m_n.png",ridge_10m_n, 
+       width = 6, height =4,units="in",device = "png",dpi=300)
+
+
+
+ridge_10m_h <- 
+  
+  ridge_10m %>% 
+  filter(difficulty=="Hard") %>%
+  ggplot() +
+  
+  ggridges::geom_density_ridges(data= ridge_10m %>% filter(difficulty=="Hard" & kill==FALSE),
+                                aes(x = duration_s , y = encounterName), 
+                                fill="#994F00", 
+                                scale = 1, alpha =0.5,           
+                                stat = "binline", size = 0) +
+  ggridges::geom_density_ridges(data= ridge_10m %>% filter(difficulty=="Hard" & kill==TRUE),
+                                aes(x = duration_s , y = encounterName), 
+                                fill="#006CD1", 
+                                scale = 1, alpha =0.5,           
+                                stat = "binline", size=0)+
+  
+  scale_x_continuous(breaks =seq(0,max(ridge_10m$duration_s),60),
+                     labels = paste0(seq(0,max(ridge_10m$duration_s),60)/60,":00"),
+                    limits=c(0,840),
+                     expand = c(0, 0))+
+  
+  geom_vline(xintercept=seq(60,max(ridge_10m$duration_s),60),linetype="dotted",alpha=0.75) +
+
+  vivax_theme_v3() + 
+  
+  guides(fill="none")+
+  labs(title="Fight Length (ICC Heroic - 10 man)",x="",y="",
+       caption=c("<p> Support: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> Last Update: 21/09/2023 &#40;dd/mm/yyyy&#41; 14:00 UTC </p>"),
+       subtitle="Data from: 2,873 kills and 10,063 wipes")
+
+
+
+
+ggsave("./_img/transition/ridge_10m_h.png",ridge_10m_h, 
+       width = 6, height =4,units="in",device = "png",dpi=300)
+
+```
+
+
+
+
+# Class plots
+
+```{r}
+df_player <- read.csv("raw_data/0_download_round3/player_data_2023_10_02_h05_m17.csv")
+
+
+df_player <- df_player %>%
+left_join(df_final %>% select(difficulty,size,fightID,logID,encounterNameColor), by=c("logID","fightID")) %>%
+  mutate(role = ifelse(icon=="DeathKnight-BloodDPS","Tank",role))
+```
+
+## Formatting
+
+```{r}
+df_player_10_n <- df_player %>%
+  filter(size==10 & difficulty=="Normal")
+
+df_player_10_h <- df_player %>%
+  filter(size==10 & difficulty=="Hard")
+
+df_player_25_n <- df_player %>%
+  filter(size==25 & difficulty=="Normal")
+  
+df_player_25_h <- df_player %>%
+  filter(size==25 & difficulty=="Hard")
+```
+
+### 10 man format
+
+```{r}
+df_player_10_n_plot <- df_player_10_n %>% 
+  filter(!is.na(icon)) %>%
+  separate(icon, into = c("Class", "Spec"), sep = "-") %>%
+  group_by(encounterNameColor,Class,role) %>% 
+  
+  summarise(n=n()) %>%
+  
+  ungroup() %>% 
+  
+  pivot_wider(names_from=Class,values_from=n) %>%
+  mutate_all(~ifelse(is.na(.), 0, .)) %>%
+  mutate(Total = rowSums(select(., 3:12), na.rm = TRUE))  %>%
+  
+  pivot_longer(cols=3:12,
+               names_to = "Class", 
+               values_to = "n") %>%
+  
+  mutate(per_result = n/Total)
+
+
+df_player_10_h_plot <- df_player_10_h %>% 
+  filter(!is.na(icon)) %>%
+  separate(icon, into = c("Class", "Spec"), sep = "-") %>%
+  group_by(encounterNameColor,Class,role) %>% 
+  
+  summarise(n=n()) %>%
+  
+  ungroup() %>% 
+  
+  pivot_wider(names_from=Class,values_from=n) %>%
+  mutate_all(~ifelse(is.na(.), 0, .)) %>%
+  mutate(Total = rowSums(select(., 3:12), na.rm = TRUE))  %>%
+  
+  pivot_longer(cols=3:12,
+               names_to = "Class", 
+               values_to = "n") %>%
+  
+  mutate(per_result = n/Total)
+```
+
+### 25 man format
+
+```{r}
+df_player_25_n_plot <- df_player_25_n %>% 
+  filter(!is.na(icon)) %>%
+  separate(icon, into = c("Class", "Spec"), sep = "-") %>%
+  group_by(encounterNameColor,Class,role) %>% 
+  
+  summarise(n=n()) %>%
+  
+  ungroup() %>% 
+  
+  pivot_wider(names_from=Class,values_from=n) %>%
+  mutate_all(~ifelse(is.na(.), 0, .)) %>%
+  mutate(Total = rowSums(select(., 3:12), na.rm = TRUE))  %>%
+  
+  pivot_longer(cols=3:12,
+               names_to = "Class", 
+               values_to = "n") %>%
+  
+  mutate(per_result = n/Total)
+
+
+df_player_25_h_plot <- df_player_25_h %>% 
+  filter(!is.na(icon)) %>%
+  separate(icon, into = c("Class", "Spec"), sep = "-") %>%
+  group_by(encounterNameColor,Class,role) %>% 
+  
+  summarise(n=n()) %>%
+  
+  ungroup() %>% 
+  
+  pivot_wider(names_from=Class,values_from=n) %>%
+  mutate_all(~ifelse(is.na(.), 0, .)) %>%
+  mutate(Total = rowSums(select(., 3:12), na.rm = TRUE))  %>%
+  
+  pivot_longer(cols=3:12,
+               names_to = "Class", 
+               values_to = "n") %>%
+  
+  mutate(per_result = n/Total)
+```
+
+```{r}
+Class_Order <- df_player_25_h_plot %>%
+    filter(role=="DPS") %>% group_by(Class) %>% summarise(sum=sum(n)) %>% arrange(desc(sum)) %>% select(Class) %>% pull(.)
+```
+
+
+## 10 man bars
+
+### DPS
+
+```{r}
+class_plot_10_h_DPS <- ggplot(df_player_10_h_plot %>%
+                      filter(role=="DPS") %>%
+                      mutate(encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing),
+                             Class=factor(Class,
+                                                   levels=Class_Order)), 
+                    aes(fill = Class, 
+                        y = per_result, 
+                        x = encounterNameColor)) + 
+  geom_bar(position="fill", stat="identity")  +
+  
+  scale_fill_manual(values=c("#8788EE","#C41E3A","#FF7C0A","#3FC7EB","#AAD372","#FFF468","#F48CBA","#FFFFFF","#C69B6D","#0070DD"))+  
+                      
+                      
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="",x="",y="",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; discord.gg/wp55kqmyYG - Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR</p>"),
+       subtitle="<p>DPS Class Distribution - Kills only </p>")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(0,1),
+                     breaks = NULL)+
+  coord_cartesian(clip = "off")
+
+
+ggsave("./_img/transition/class_10m_h_dps.png",class_plot_10_h_DPS, 
+       width = 4, height =4,units="in",device = "png",dpi=300)
+
+```
+
+```{r}
+class_plot_10_n_DPS <- ggplot(df_player_10_n_plot %>%
+                      filter(role=="DPS")%>%
+                      mutate(encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing),
+                             Class=factor(Class,
+                                                   levels=Class_Order)), 
+                    aes(fill = Class, 
+                        y = per_result, 
+                        x = encounterNameColor)) + 
+  geom_bar(position="fill", stat="identity")  +
+  
+  scale_fill_manual(values=c("#8788EE","#C41E3A","#FF7C0A","#3FC7EB","#AAD372","#FFF468","#F48CBA","#FFFFFF","#C69B6D","#0070DD"))+  
+                      
+                      
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="",x="",y="",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; discord.gg/wp55kqmyYG - Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR</p>"),
+       subtitle="<p>DPS Class Distribution - Kills only </p>")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(0,1),
+                     breaks = NULL)+
+  coord_cartesian(clip = "off")
+
+
+ggsave("./_img/transition/class_10m_n_dps.png",class_plot_10_n_DPS, 
+       width = 4, height =4,units="in",device = "png",dpi=300)
+
+```
+
+### Healer
+
+```{r}
+class_plot_10_h_heal <- ggplot(df_player_10_h_plot %>%
+                      filter(role=="Healer")%>%
+                      mutate(encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing),
+                             Class=factor(Class,
+                                                   levels=Class_Order)), 
+                    aes(fill = Class, 
+                        y = per_result, 
+                        x = encounterNameColor)) + 
+  geom_bar(position="fill", stat="identity")  +
+  
+  scale_fill_manual(values=c("#8788EE","#C41E3A","#FF7C0A","#3FC7EB","#AAD372","#FFF468","#F48CBA","#FFFFFF","#C69B6D","#0070DD"))+  
+                      
+                      
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="",x="",y="",
+       caption=c("<p>&nbsp;&nbsp;&nbsp;"," <br> &nbsp;&nbsp;&nbsp; </p>"),
+       subtitle="<p>Heal Class Distribution - Kills only </p>")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(0,1),
+                     breaks = NULL)+
+  coord_cartesian(clip = "off")
+
+
+ggsave("./_img/transition/class_10m_h_heal.png",class_plot_10_h_heal, 
+       width = 4, height =4,units="in",device = "png",dpi=300)
+
+```
+
+```{r}
+class_plot_10_n_heal <- ggplot(df_player_10_n_plot %>%
+                      filter(role=="Healer") %>%
+                      mutate(encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing),
+                             Class=factor(Class,
+                                                   levels=Class_Order)), 
+                    aes(fill = Class, 
+                        y = per_result, 
+                        x = encounterNameColor)) + 
+  geom_bar(position="fill", stat="identity")  +
+  
+  scale_fill_manual(values=c("#8788EE","#C41E3A","#FF7C0A","#3FC7EB","#AAD372","#FFF468","#F48CBA","#FFFFFF","#C69B6D","#0070DD"))+  
+                      
+                      
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="",x="",y="",
+       caption=c("<p>&nbsp;&nbsp;&nbsp;"," <br> &nbsp;&nbsp;&nbsp; </p>"),
+       subtitle="<p>Heal Class Distribution - Kills only </p>")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(0,1),
+                     breaks = NULL)+
+  coord_cartesian(clip = "off")
+
+
+ggsave("./_img/transition/class_10m_n_heal.png",class_plot_10_n_heal, 
+       width = 4, height =4,units="in",device = "png",dpi=300)
+
+```
+
+### Tank
+
+```{r}
+class_plot_10_h_Tank <- ggplot(df_player_10_h_plot %>%
+                      filter(role=="Tank") %>%
+                      mutate(encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing),
+                             Class=factor(Class,
+                                                   levels=Class_Order)), 
+                    aes(fill = Class, 
+                        y = per_result, 
+                        x = encounterNameColor)) + 
+  geom_bar(position="fill", stat="identity")  +
+  
+  scale_fill_manual(values=c("#8788EE","#C41E3A","#FF7C0A","#3FC7EB","#AAD372","#FFF468","#F48CBA","#FFFFFF","#C69B6D","#0070DD"))+  
+                      
+                      
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="",x="",y="",
+       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 02/10/2023 &#40;dd/mm/yyyy&#41; 06:00 UTC </p>"),
+       subtitle="<p>Tank Class Distribution - Kills only </p>")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(0,1),
+                     breaks = NULL)+
+  coord_cartesian(clip = "off")
+
+
+ggsave("./_img/transition/class_10m_h_tank.png",class_plot_10_h_Tank, 
+       width = 4, height =4,units="in",device = "png",dpi=300)
+
+```
+
+```{r}
+class_plot_10_n_Tank <- ggplot(df_player_10_n_plot %>%
+                      filter(role=="Tank") %>%
+                      mutate(encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing),
+                             Class=factor(Class,
+                                                   levels=Class_Order)), 
+                    aes(fill = Class, 
+                        y = per_result, 
+                        x = encounterNameColor)) + 
+  geom_bar(position="fill", stat="identity")  +
+  
+  scale_fill_manual(values=c("#8788EE","#C41E3A","#FF7C0A","#3FC7EB","#AAD372","#FFF468","#F48CBA","#FFFFFF","#C69B6D","#0070DD"))+  
+                      
+                      
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="",x="",y="",
+       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 02/10/2023 &#40;dd/mm/yyyy&#41; 06:00 UTC </p>"),
+       subtitle="<p>Tank Class Distribution - Kills only </p>")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(0,1),
+                     breaks = NULL)+
+  coord_cartesian(clip = "off")
+
+
+ggsave("./_img/transition/class_10m_n_tank.png",class_plot_10_n_Tank, 
+       width = 4, height =4,units="in",device = "png",dpi=300)
+
+```
+
+
+## 25 man bars
+
+### DPS
+
+```{r}
+class_plot_25_h_DPS <- ggplot(df_player_25_h_plot %>%
+                      filter(role=="DPS") %>%
+                      mutate(encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing),
+                             Class=factor(Class,
+                                                   levels=Class_Order)), 
+                    aes(fill = Class, 
+                        y = per_result, 
+                        x = encounterNameColor)) + 
+  geom_bar(position="fill", stat="identity")  +
+  
+  scale_fill_manual(values=c("#8788EE","#C41E3A","#FF7C0A","#3FC7EB","#AAD372","#FFF468","#F48CBA","#FFFFFF","#C69B6D","#0070DD"))+  
+                      
+                      
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="",x="",y="",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; discord.gg/wp55kqmyYG - Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR</p>"),
+       subtitle="<p>DPS Class Distribution - Kills only </p>")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(0,1),
+                     breaks = NULL)+
+  coord_cartesian(clip = "off")
+
+
+ggsave("./_img/transition/class_25m_h_dps.png",class_plot_25_h_DPS, 
+       width = 4, height =4,units="in",device = "png",dpi=300)
+
+```
+
+```{r}
+class_plot_25_n_DPS <- ggplot(df_player_25_n_plot %>%
+                      filter(role=="DPS") %>%
+                      mutate(encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing),
+                             Class=factor(Class,
+                                                   levels=Class_Order)), 
+                    aes(fill = Class, 
+                        y = per_result, 
+                        x = encounterNameColor)) + 
+  geom_bar(position="fill", stat="identity")  +
+  
+  scale_fill_manual(values=c("#8788EE","#C41E3A","#FF7C0A","#3FC7EB","#AAD372","#FFF468","#F48CBA","#FFFFFF","#C69B6D","#0070DD"))+
+                      
+                      
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="",x="",y="",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; discord.gg/wp55kqmyYG - Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR</p>"),
+       subtitle="<p>DPS Class Distribution - Kills only </p>")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(0,1),
+                     breaks = NULL)+
+  coord_cartesian(clip = "off")
+
+
+ggsave("./_img/transition/class_25m_n_dps.png",class_plot_25_n_DPS, 
+       width = 4, height =4,units="in",device = "png",dpi=300)
+
+```
+
+### Healer
+
+```{r}
+class_plot_25_h_heal <- ggplot(df_player_25_h_plot %>%
+                      filter(role=="Healer") %>%
+                      mutate(encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing),
+                             Class=factor(Class,
+                                                   levels=Class_Order)), 
+                    aes(fill = Class, 
+                        y = per_result, 
+                        x = encounterNameColor)) + 
+  geom_bar(position="fill", stat="identity")  +
+  
+  scale_fill_manual(values=c("#8788EE","#C41E3A","#FF7C0A","#3FC7EB","#AAD372","#FFF468","#F48CBA","#FFFFFF","#C69B6D","#0070DD"))+
+                      
+                      
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="",x="",y="",
+       caption=c("<p>&nbsp;&nbsp;&nbsp;"," <br> &nbsp;&nbsp;&nbsp; </p>"),
+       subtitle="<p>Heal Class Distribution - Kills only </p>")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(0,1),
+                     breaks = NULL)+
+  coord_cartesian(clip = "off")
+
+
+ggsave("./_img/transition/class_25m_h_heal.png",class_plot_25_h_heal, 
+       width = 4, height =4,units="in",device = "png",dpi=300)
+
+```
+
+```{r}
+class_plot_25_n_heal <- ggplot(df_player_25_n_plot %>%
+                      filter(role=="Healer") %>%
+                      mutate(encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing),
+                             Class=factor(Class,
+                                                   levels=Class_Order)), 
+                    aes(fill = Class, 
+                        y = per_result, 
+                        x = encounterNameColor)) + 
+  geom_bar(position="fill", stat="identity")  +
+  
+  scale_fill_manual(values=c("#8788EE","#C41E3A","#FF7C0A","#3FC7EB","#AAD372","#FFF468","#F48CBA","#FFFFFF","#C69B6D","#0070DD"))+
+                      
+                      
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="",x="",y="",
+       caption=c("<p>&nbsp;&nbsp;&nbsp;"," <br> &nbsp;&nbsp;&nbsp; </p>"),
+       subtitle="<p>Heal Class Distribution - Kills only </p>")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(0,1),
+                     breaks = NULL)+
+  coord_cartesian(clip = "off")
+
+
+ggsave("./_img/transition/class_25m_n_heal.png",class_plot_25_n_heal, 
+       width = 4, height =4,units="in",device = "png",dpi=300)
+
+```
+
+### Tank
+
+```{r}
+class_plot_25_h_Tank <- ggplot(df_player_25_h_plot %>%
+                      filter(role=="Tank") %>%
+                      mutate(encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing),
+                             Class=factor(Class,
+                                                   levels=Class_Order)), 
+                    aes(fill = Class, 
+                        y = per_result, 
+                        x = encounterNameColor)) + 
+  geom_bar(position="fill", stat="identity")  +
+  
+  scale_fill_manual(values=c("#8788EE","#C41E3A","#FF7C0A","#3FC7EB","#AAD372","#FFF468","#F48CBA","#FFFFFF","#C69B6D","#0070DD"))+
+                      
+                      
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="",x="",y="",
+       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 02/10/2023 &#40;dd/mm/yyyy&#41; 06:00 UTC </p>"),
+       subtitle="<p>Tank Class Distribution - Kills only </p>")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(0,1),
+                     breaks = NULL)+
+  coord_cartesian(clip = "off")
+
+
+ggsave("./_img/transition/class_25m_h_tank.png",class_plot_25_h_Tank, 
+       width = 4, height =4,units="in",device = "png",dpi=300)
+
+```
+
+```{r}
+class_plot_25_n_Tank <- ggplot(df_player_25_n_plot %>%
+                      filter(role=="Tank") %>%
+                      mutate(encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing),
+                             Class=factor(Class,
+                                                   levels=Class_Order)), 
+                    aes(fill = Class, 
+                        y = per_result, 
+                        x = encounterNameColor)) + 
+  geom_bar(position="fill", stat="identity")  +
+  
+  scale_fill_manual(values=c("#8788EE","#C41E3A","#FF7C0A","#3FC7EB","#AAD372","#FFF468","#F48CBA","#FFFFFF","#C69B6D","#0070DD"))+
+                      
+                      
+  vivax_theme() + 
+  guides(fill="none") +
+  labs(title="",x="",y="",
+       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 02/10/2023 &#40;dd/mm/yyyy&#41; 06:00 UTC </p>"),
+       subtitle="<p>Tank Class Distribution - Kills only </p>")+
+  scale_y_continuous(labels = scales::percent, 
+                     limits = c(0,1),
+                     breaks = NULL)+
+  coord_cartesian(clip = "off")
+
+
+ggsave("./_img/transition/class_25m_n_tank.png",class_plot_25_n_Tank, 
+       width = 4, height =4,units="in",device = "png",dpi=300)
+
+```
+
+
+
+
+
+# Final canvas
+
+## + Canvas 1
+
+```{r} 
+canvas <- image_blank(width = 3600, height = 2420)
+
+
+canvas <- image_composite(canvas, plot_title_white, offset = "+0+0",operator = "over")
+canvas <- image_composite(canvas, plot_title, offset = "+160+10",operator = "over")
+canvas <- image_composite(canvas, plot_title_2, offset = "+1250+0",operator = "over")
+
+canvas <- image_composite(canvas,plot_25_h_img , offset = "+0+145",operator = "over")
+canvas <- image_composite(canvas,  plot_25_n_img, offset = "+1800+145",operator = "over")
+canvas <- image_composite(canvas, plot_10_h_img , offset = "+0+1245",operator = "over")
+canvas <- image_composite(canvas,plot_10_n_img  , offset = "+1800+1245",operator = "over")
+
+image_write(canvas, "./_img/ICCPTR_3rdSession.png")
+
+```
+
+## + Canvas 2
+
+```{r}
+plot_ridge_25_n_img <- magick::image_read("./_img/transition/ridge_25m_n.png")
+plot_ridge_25_h_img <- magick::image_read("./_img/transition/ridge_25m_h.png")
+plot_ridge_10_n_img <- magick::image_read("./_img/transition/ridge_10m_n.png")
+plot_ridge_10_h_img <- magick::image_read("./_img/transition/ridge_10m_h.png")
+```
+
+```{r} 
+canvas <- image_blank(width = 3600, height = 2420)
+
+
+canvas <- image_composite(canvas, plot_title_white, offset = "+0+0",operator = "over")
+canvas <- image_composite(canvas, plot_title, offset = "+160+10",operator = "over")
+canvas <- image_composite(canvas, plot_title_2, offset = "+1250+0",operator = "over")
+
+canvas <- image_composite(canvas,plot_25_h_img , offset = "+0+145",operator = "over")
+canvas <- image_composite(canvas,plot_ridge_25_h_img  , offset = "+1800+145",operator = "over")
+canvas <- image_composite(canvas, plot_25_n_img , offset = "+0+1245",operator = "over")
+canvas <- image_composite(canvas,plot_ridge_25_n_img  , offset = "+1800+1245",operator = "over")
+
+image_write(canvas, "./_img/ICCPTR_3rdSession_v2_25m.png")
+
+```
+
+```{r} 
+canvas <- image_blank(width = 3600, height = 2420)
+
+
+canvas <- image_composite(canvas, plot_title_white, offset = "+0+0",operator = "over")
+canvas <- image_composite(canvas, plot_title, offset = "+160+10",operator = "over")
+canvas <- image_composite(canvas, plot_title_2, offset = "+1250+0",operator = "over")
+
+canvas <- image_composite(canvas,plot_10_h_img , offset = "+0+145",operator = "over")
+canvas <- image_composite(canvas,plot_ridge_10_h_img  , offset = "+1800+145",operator = "over")
+canvas <- image_composite(canvas, plot_10_n_img , offset = "+0+1245",operator = "over")
+canvas <- image_composite(canvas,plot_ridge_10_n_img  , offset = "+1800+1245",operator = "over")
+
+image_write(canvas, "./_img/ICCPTR_3rdSession_v2_10m.png")
+
+```
+
+## + Canvas 3
+
+```{r}
+plot_class_10_h_img_tank <- magick::image_read("./_img/transition/class_10m_h_tank.png")
+plot_class_10_h_img_dps <- magick::image_read("./_img/transition/class_10m_h_dps.png")
+plot_class_10_h_img_heal <- magick::image_read("./_img/transition/class_10m_h_heal.png")
+```
+
+
+```{r} 
+canvas <- image_blank(width = 3600, height = 2420)
+
+
+canvas <- image_composite(canvas, plot_title_white, offset = "+0+0",operator = "over")
+canvas <- image_composite(canvas, plot_title, offset = "+160+10",operator = "over")
+canvas <- image_composite(canvas, plot_title_2, offset = "+1250+0",operator = "over")
+
+canvas <- image_composite(canvas,plot_10_h_img , offset = "+0+145",operator = "over")
+canvas <- image_composite(canvas,plot_ridge_10_h_img  , offset = "+1800+145",operator = "over")
+
+canvas <- image_composite(canvas,plot_class_10_h_img_dps  , offset = "+0+1245",operator = "over")
+canvas <- image_composite(canvas,plot_class_10_h_img_heal  , offset = "+1200+1245",operator = "over")
+canvas <- image_composite(canvas,plot_class_10_h_img_tank  , offset = "+2400+1245",operator = "over")
+
+
+image_write(canvas, "./_img/ICCPTR_3rdSession_v3_10mH.png")
+
+```
+
+
+```{r}
+plot_class_10_n_img_tank <- magick::image_read("./_img/transition/class_10m_n_tank.png")
+plot_class_10_n_img_dps <- magick::image_read("./_img/transition/class_10m_n_dps.png")
+plot_class_10_n_img_heal <- magick::image_read("./_img/transition/class_10m_n_heal.png")
+```
+
+
+```{r} 
+canvas <- image_blank(width = 3600, height = 2420)
+
+
+canvas <- image_composite(canvas, plot_title_white, offset = "+0+0",operator = "over")
+canvas <- image_composite(canvas, plot_title, offset = "+160+10",operator = "over")
+canvas <- image_composite(canvas, plot_title_2, offset = "+1250+0",operator = "over")
+
+canvas <- image_composite(canvas,plot_10_n_img , offset = "+0+145",operator = "over")
+canvas <- image_composite(canvas,plot_ridge_10_n_img  , offset = "+1800+145",operator = "over")
+
+canvas <- image_composite(canvas,plot_class_10_n_img_dps  , offset = "+0+1245",operator = "over")
+canvas <- image_composite(canvas,plot_class_10_n_img_heal  , offset = "+1200+1245",operator = "over")
+canvas <- image_composite(canvas,plot_class_10_n_img_tank  , offset = "+2400+1245",operator = "over")
+
+
+image_write(canvas, "./_img/ICCPTR_3rdSession_v3_10mN.png")
+
+```
+
+```{r}
+plot_class_25_h_img_tank <- magick::image_read("./_img/transition/class_25m_h_tank.png")
+plot_class_25_h_img_dps <- magick::image_read("./_img/transition/class_25m_h_dps.png")
+plot_class_25_h_img_heal <- magick::image_read("./_img/transition/class_25m_h_heal.png")
+```
+
+
+```{r} 
+canvas <- image_blank(width = 3600, height = 2420)
+
+
+canvas <- image_composite(canvas, plot_title_white, offset = "+0+0",operator = "over")
+canvas <- image_composite(canvas, plot_title, offset = "+160+10",operator = "over")
+canvas <- image_composite(canvas, plot_title_2, offset = "+1250+0",operator = "over")
+
+canvas <- image_composite(canvas,plot_25_h_img , offset = "+0+145",operator = "over")
+canvas <- image_composite(canvas,plot_ridge_25_h_img  , offset = "+1800+145",operator = "over")
+
+canvas <- image_composite(canvas,plot_class_25_h_img_dps  , offset = "+0+1245",operator = "over")
+canvas <- image_composite(canvas,plot_class_25_h_img_heal  , offset = "+1200+1245",operator = "over")
+canvas <- image_composite(canvas,plot_class_25_h_img_tank  , offset = "+2400+1245",operator = "over")
+
+
+image_write(canvas, "./_img/ICCPTR_3rdSession_v3_25mH.png")
+
+```
+
+
+```{r}
+plot_class_25_n_img_tank <- magick::image_read("./_img/transition/class_25m_n_tank.png")
+plot_class_25_n_img_dps <- magick::image_read("./_img/transition/class_25m_n_dps.png")
+plot_class_25_n_img_heal <- magick::image_read("./_img/transition/class_25m_n_heal.png")
+```
+
+
+```{r} 
+canvas <- image_blank(width = 3600, height = 2420)
+
+
+canvas <- image_composite(canvas, plot_title_white, offset = "+0+0",operator = "over")
+canvas <- image_composite(canvas, plot_title, offset = "+160+10",operator = "over")
+canvas <- image_composite(canvas, plot_title_2, offset = "+1250+0",operator = "over")
+
+canvas <- image_composite(canvas,plot_25_n_img , offset = "+0+145",operator = "over")
+canvas <- image_composite(canvas,plot_ridge_25_n_img  , offset = "+1800+145",operator = "over")
+
+canvas <- image_composite(canvas,plot_class_25_n_img_dps  , offset = "+0+1245",operator = "over")
+canvas <- image_composite(canvas,plot_class_25_n_img_heal  , offset = "+1200+1245",operator = "over")
+canvas <- image_composite(canvas,plot_class_25_n_img_tank  , offset = "+2400+1245",operator = "over")
+
+
+image_write(canvas, "./_img/ICCPTR_3rdSession_v3_25mN.png")
+
+```
+
+
+
+
+
+
+```{r}
+df_final %>% filter(difficulty=="Normal" & size==10) %>%  group_by(logID) %>% summarise(n=n())
+df_final %>% filter(difficulty=="Normal" & size==10) %>%  group_by(logID,fightID) %>% summarise(n=n())
+
+df_final %>% filter(difficulty=="Hard" & size==10) %>%  group_by(logID) %>% summarise(n=n())
+df_final %>% filter(difficulty=="Hard" & size==10) %>%  group_by(logID,fightID) %>% summarise(n=n())
+
+df_final %>% filter(difficulty=="Normal" & size==25) %>%  group_by(logID) %>% summarise(n=n())
+df_final %>% filter(difficulty=="Normal" & size==25) %>%  group_by(logID,fightID) %>% summarise(n=n())
+
+df_final %>% filter(difficulty=="Hard" & size==25) %>%  group_by(logID) %>% summarise(n=n())
+df_final %>% filter(difficulty=="Hard" & size==25) %>%  group_by(logID,fightID) %>% summarise(n=n())
+
+
+
+df_final %>% filter(difficulty=="Normal" & size==10) %>%  group_by(kill) %>% summarise(n=n())
+```
+
+
+```{r}
+df_player %>% filter(icon %in% c("Druid-Warden",
+                                      "Druid-Guardian") & size==25) %>%
+  group_by(encounterNameColor,icon) %>% summarise(n=n()) %>%
+  pivot_wider(names_from = icon,values_from = n)
+
+
+ 
+df_player %>% 
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(icon) ) %>% 
+  filter(size==25 & difficulty=="Hard" ) %>%
+  group_by(logID,fightID,encounterNameColor,icon) %>%
+  summarise(n=n()) %>% 
+  arrange(desc(n)) %>%
+  group_by(encounterNameColor,icon) %>%
+  summarise(min=min(n,na.rm=T),
+            max=max(n,na.rm=T),
+            median=median(n,na.rm=T)) %>%
+  arrange(desc(median))
+
+ 
+df_player %>% filter(role=="Healer") %>%
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(icon) ) %>% 
+  filter(size==25 & difficulty=="Hard" ) %>%
+  group_by(logID,fightID,encounterNameColor,role) %>%
+  summarise(n=n()) %>% 
+  arrange(desc(n)) %>%
+  group_by(encounterNameColor,role) %>%
+  summarise(min=min(n,na.rm=T),
+            max=max(n,na.rm=T),
+            median=median(n,na.rm=T)) %>%
+  arrange(desc(median))
+
+
+
+
+
+
+df_player %>% filter(role=="Healer") %>%
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(icon) ) %>% 
+  filter(size==25 & difficulty=="Hard" ) %>%
+  group_by(logID,fightID,encounterNameColor,role) %>%
+  summarise(n=n()) %>% 
+  filter(encounterNameColor=="<b><span style='color:#464646;'>Saurfang</span></b>")
+
+
+
+df_player %>% filter(role=="Tank") %>%
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(icon) ) %>% 
+  filter(size==25 & difficulty=="Hard" ) %>%
+  group_by(logID,fightID,encounterNameColor,icon) %>%
+  summarise(n=n()) %>% 
+  filter(encounterNameColor=="<b><span style='color:#464646;'>Saurfang</span></b>") %>%
+  arrange(icon)
+```
+
+
+
+
+
+
+
+
+
+```{r}
+a <- df_final %>% filter(encounterID==856 & kill==T)
+```
+
+
+## Full clears
+
+```{r}
+df<- read.csv("./raw_data/ICC_PTR_clean_Data_3rdround_2023_09_30_h08_m13.csv")
+              
+df %>% select(logID,encounterName,size,kill) %>% filter(!is.na(encounterName)) %>%
+  pivot_wider(names_from = encounterName, values_from = kill) %>%
+  mutate_at(c(3:14), ~paste0(.))  %>%
+  mutate_at(c(3:14), ~ifelse(.=="NULL",0,1)) %>%
+  
+  mutate(sum_AB = rowSums(select(.,3:14))) %>%
+  filter(sum_AB >=9) %>% write.csv("full_PTR_ICC.csv")
+
+```
+
