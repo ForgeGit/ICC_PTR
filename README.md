@@ -4,13 +4,17 @@ PTR data for the raid "The Icecrown Citadel" (ICC) - World of Warcraft: Wrath of
 
 ## 3rd round of PTR testing
 
+### 25 man HEROIC
 <img src="_img/ICCPTR_3rdSession_v3_25mH.png"/>
 
+### 10 man HEROIC
 <img src="_img/ICCPTR_3rdSession_v3_10mH.png"/>
 
+### 25 man NORMAL
 <img src="_img/ICCPTR_3rdSession_v3_25mN.png"/>
 
-<img src="_img/ICCPTR_3rdSession_v3_25mN.png"/>
+### 10 man NORMAL
+<img src="_img/ICCPTR_3rdSession_v3_10mN.png"/>
 
 ## 2nd round of PTR testing
 
