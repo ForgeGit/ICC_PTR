@@ -2,15 +2,25 @@
 
 PTR data for the raid "The Icecrown Citadel" (ICC) - World of Warcraft: Wrath of the Lich King Classic (2023) 
 
-## 1st round of PTR testing
+## 3rd round of PTR testing
 
-<img src="_img/ICCPTR_1stSession.png"/>
+<img src="_img/ICCPTR_3rdSession_v3_25mH.png"/>
+
+<img src="_img/ICCPTR_3rdSession_v3_10mH.png"/>
+
+<img src="_img/ICCPTR_3rdSession_v3_25mN.png"/>
+
+<img src="_img/ICCPTR_3rdSession_v3_25mN.png"/>
 
 ## 2nd round of PTR testing
 
 <img src="_img/ICCPTR_2ndSession_v2_25m.png"/>
 
 <img src="_img/ICCPTR_2ndSession_v2_10m.png"/>
+
+## 1st round of PTR testing
+
+<img src="_img/ICCPTR_1stSession.png"/>
 
 ## Methodology
 
