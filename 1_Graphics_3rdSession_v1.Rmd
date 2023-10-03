@@ -176,7 +176,6 @@ vivax_theme_v3 <- function() {
 
 ```
 
-
 # Data
 
 ## +Load
@@ -200,7 +199,6 @@ df_final_10m <- df_final %>%
 df_final_25m <- df_final %>%
   filter(size==25)
 ```
-
 
 ## +Format 25m
 
@@ -253,6 +251,7 @@ order_25_long_norm <- order_25_long %>%
 ```
 
 ## +Format 10m
+
 ```{r}
 ### Wide
 order_10_wide <- df_final_10m  %>%
@@ -303,7 +302,7 @@ order_10_long_norm <- order_10_long %>%
 
 ## +Extras
 
-### *Boss order
+### \*Boss order
 
 ```{r}
 boss_order_wing <- c(
@@ -321,8 +320,6 @@ boss_order_wing <- c(
   "<b><span style='color:#000000;'>LK</span></b>"
 )
 ```
-
-
 
 # Title segment
 
@@ -386,7 +383,6 @@ ggsave("./_img/transition/plot_title_white.png",title,
 
 plot_title_white  <- magick::image_read("./_img/transition/plot_title_white.png")
 ```
-
 
 # Bar Plots
 
@@ -541,8 +537,8 @@ plot_10_h_img <- magick::image_read("./_img/transition/plot_10_h.png")
 plot_10_n_img <- magick::image_read("./_img/transition/plot_10_n.png")
 ```
 
-
 ### 25m plots
+
 ```{r}
 ###
 plot_25_h <- ggplot(order_25_long %>%
@@ -692,7 +688,6 @@ ggsave("./_img/transition/plot_25_n.png",plot_25_n,
 plot_25_h_img <- magick::image_read("./_img/transition/plot_25_h.png")
 plot_25_n_img <- magick::image_read("./_img/transition/plot_25_n.png")
 ```
-
 
 # Ridge Plots
 
@@ -872,9 +867,6 @@ ggsave("./_img/transition/ridge_10m_h.png",ridge_10m_h,
 
 ```
 
-
-
-
 # Class plots
 
 ```{r}
@@ -992,7 +984,6 @@ df_player_25_h_plot <- df_player_25_h %>%
 Class_Order <- df_player_25_h_plot %>%
     filter(role=="DPS") %>% group_by(Class) %>% summarise(sum=sum(n)) %>% arrange(desc(sum)) %>% select(Class) %>% pull(.)
 ```
-
 
 ## 10 man bars
 
@@ -1144,7 +1135,7 @@ class_plot_10_h_Tank <- ggplot(df_player_10_h_plot %>%
   vivax_theme() +
   guides(fill="none") +
   labs(title="",x="",y="",
-       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 02/10/2023 &#40;dd/mm/yyyy&#41; 06:00 UTC </p>"),
+       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1.1 03/10/2023 &#40;dd/mm/yyyy&#41; 16:00 UTC </p>"),
        subtitle="<p>Tank Class Distribution - Kills only </p>")+
   scale_y_continuous(labels = scales::percent,
                      limits = c(0,1),
@@ -1175,7 +1166,7 @@ class_plot_10_n_Tank <- ggplot(df_player_10_n_plot %>%
   vivax_theme() +
   guides(fill="none") +
   labs(title="",x="",y="",
-       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 02/10/2023 &#40;dd/mm/yyyy&#41; 06:00 UTC </p>"),
+       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1.1 03/10/2023 &#40;dd/mm/yyyy&#41; 16:00 UTC </p>"),
        subtitle="<p>Tank Class Distribution - Kills only </p>")+
   scale_y_continuous(labels = scales::percent,
                      limits = c(0,1),
@@ -1187,7 +1178,6 @@ ggsave("./_img/transition/class_10m_n_tank.png",class_plot_10_n_Tank,
        width = 4, height =4,units="in",device = "png",dpi=300)
 
 ```
-
 
 ## 25 man bars
 
@@ -1339,7 +1329,7 @@ class_plot_25_h_Tank <- ggplot(df_player_25_h_plot %>%
   vivax_theme() +
   guides(fill="none") +
   labs(title="",x="",y="",
-       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 02/10/2023 &#40;dd/mm/yyyy&#41; 06:00 UTC </p>"),
+       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1.1 03/10/2023 &#40;dd/mm/yyyy&#41; 16:00 UTC </p>"),
        subtitle="<p>Tank Class Distribution - Kills only </p>")+
   scale_y_continuous(labels = scales::percent,
                      limits = c(0,1),
@@ -1370,7 +1360,7 @@ class_plot_25_n_Tank <- ggplot(df_player_25_n_plot %>%
   vivax_theme() +
   guides(fill="none") +
   labs(title="",x="",y="",
-       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 02/10/2023 &#40;dd/mm/yyyy&#41; 06:00 UTC </p>"),
+       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1.1 03/10/2023 &#40;dd/mm/yyyy&#41; 16:00 UTC </p>"),
        subtitle="<p>Tank Class Distribution - Kills only </p>")+
   scale_y_continuous(labels = scales::percent,
                      limits = c(0,1),
@@ -1382,10 +1372,6 @@ ggsave("./_img/transition/class_25m_n_tank.png",class_plot_25_n_Tank,
        width = 4, height =4,units="in",device = "png",dpi=300)
 
 ```
-
-
-
-
 
 # Final canvas
 
@@ -1459,7 +1445,6 @@ plot_class_10_h_img_dps <- magick::image_read("./_img/transition/class_10m_h_dps
 plot_class_10_h_img_heal <- magick::image_read("./_img/transition/class_10m_h_heal.png")
 ```
 
-
 ```{r}
 canvas <- image_blank(width = 3600, height = 2420)
 
@@ -1480,13 +1465,11 @@ image_write(canvas, "./_img/ICCPTR_3rdSession_v3_10mH.png")
 
 ```
 
-
 ```{r}
 plot_class_10_n_img_tank <- magick::image_read("./_img/transition/class_10m_n_tank.png")
 plot_class_10_n_img_dps <- magick::image_read("./_img/transition/class_10m_n_dps.png")
 plot_class_10_n_img_heal <- magick::image_read("./_img/transition/class_10m_n_heal.png")
 ```
-
 
 ```{r}
 canvas <- image_blank(width = 3600, height = 2420)
@@ -1514,7 +1497,6 @@ plot_class_25_h_img_dps <- magick::image_read("./_img/transition/class_25m_h_dps
 plot_class_25_h_img_heal <- magick::image_read("./_img/transition/class_25m_h_heal.png")
 ```
 
-
 ```{r}
 canvas <- image_blank(width = 3600, height = 2420)
 
@@ -1535,13 +1517,11 @@ image_write(canvas, "./_img/ICCPTR_3rdSession_v3_25mH.png")
 
 ```
 
-
 ```{r}
 plot_class_25_n_img_tank <- magick::image_read("./_img/transition/class_25m_n_tank.png")
 plot_class_25_n_img_dps <- magick::image_read("./_img/transition/class_25m_n_dps.png")
 plot_class_25_n_img_heal <- magick::image_read("./_img/transition/class_25m_n_heal.png")
 ```
-
 
 ```{r}
 canvas <- image_blank(width = 3600, height = 2420)
@@ -1565,7 +1545,6 @@ image_write(canvas, "./_img/ICCPTR_3rdSession_v3_25mN.png")
 
 Anything below here is leftover code and science, sort of
 
-
 ```{r}
 df_final %>% filter(difficulty=="Normal" & size==10) %>%  group_by(logID) %>% summarise(n=n())
 df_final %>% filter(difficulty=="Normal" & size==10) %>%  group_by(logID,fightID) %>% summarise(n=n())
@@ -1584,8 +1563,6 @@ df_final %>% filter(difficulty=="Hard" & size==25) %>%  group_by(logID,fightID) 
 df_final %>% filter(difficulty=="Normal" & size==10) %>%  group_by(kill) %>% summarise(n=n())
 ```
 
-
-
 ```{r}
 player_explore <- df_player %>% filter(role=="Healer") %>%
   filter(!is.na(encounterNameColor) ) %>% 
@@ -1599,7 +1576,6 @@ player_explore <- df_player %>% filter(role=="Healer") %>%
             median=median(n,na.rm=T))
 ```
 
-
 ```{r}
 df_player_2 <- df_player %>%
   separate(icon, into = c("Class", "Spec"), sep = "-") %>%
@@ -1611,7 +1587,6 @@ Healer_Order <- df_player_2 %>%
   filter(!is.na(encounterNameColor) ) %>% 
   filter(!is.na(Spec) ) %>% group_by(Spec) %>% summarise(sum=n()) %>% arrange(desc(sum)) %>% select(Spec) %>% pull(.)
 ```
-
 
 ```{r}
 plot1<- df_player_2 %>%
@@ -1640,7 +1615,7 @@ plot1<- df_player_2 %>%
   scale_color_manual(values=c("#F48CBA","#2D2947","#0070DD","#FF7C0A","#665934")) + 
   guides(color="none") +
   labs(title="",x="",y="",
-       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 02/10/2023 &#40;dd/mm/yyyy&#41; 06:00 UTC </p>"),
+       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 03/10/2023 &#40;dd/mm/yyyy&#41; 16:00 UTC </p>"),
        subtitle="<p># of Healers for each spec - Kills only </p>") +
    vivax_theme() +
   theme(strip.text.x = element_markdown(size = scale_factor * 12)) +
@@ -1649,13 +1624,6 @@ plot1<- df_player_2 %>%
 ggsave("./_img/transition/plot1_heal_class.png",plot1, 
        width = 5, height =5,units="in",device = "png",dpi=300)
 ```
-
-
-
-
-
-
-
 
 ```{r}
 df_player %>% filter(icon %in% c("Druid-Warden",
@@ -1693,7 +1661,6 @@ df_player %>% filter(role=="Healer") %>%
   arrange(desc(median))
 ```
 
-
 ```{r}
  df_player %>% filter(encounterNameColor=="<b><span style='color:#040A54;'>Valithria</span></b>") %>%
   filter(!is.na(encounterNameColor) ) %>% 
@@ -1713,7 +1680,6 @@ df_player %>% filter(role=="Healer") %>%
             median=median(n,na.rm=T)) %>%
   arrange(desc(median))
 ```
-
 
 ```{r}
 df_player %>% filter(role=="Healer") %>%
@@ -1737,18 +1703,9 @@ df_player %>% filter(role=="Healer") %>%
   arrange(desc(n))
 ```
 
-
-
-
-
-
-
-
-
 ```{r}
 a <- df_final %>% filter(encounterID==856 & kill==T)
 ```
-
 
 ## Full clears
 
