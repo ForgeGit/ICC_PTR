@@ -1563,9 +1563,7 @@ image_write(canvas, "./_img/ICCPTR_3rdSession_v3_25mN.png")
 
 ```
 
-
-
-
+Anything below here is leftover code and science, sort of
 
 
 ```{r}
@@ -1585,6 +1583,78 @@ df_final %>% filter(difficulty=="Hard" & size==25) %>%  group_by(logID,fightID) 
 
 df_final %>% filter(difficulty=="Normal" & size==10) %>%  group_by(kill) %>% summarise(n=n())
 ```
+
+
+
+```{r}
+player_explore <- df_player %>% filter(role=="Healer") %>%
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(icon) ) %>% 
+  filter(size==25 & difficulty=="Hard" ) %>%
+  group_by(logID,fightID,encounterNameColor,icon) %>%
+  summarise(n=n()) %>%
+  group_by(encounterNameColor,icon) %>%
+  summarise(min=min(n,na.rm=T),
+            max=max(n,na.rm=T),
+            median=median(n,na.rm=T))
+```
+
+
+```{r}
+df_player_2 <- df_player %>%
+  separate(icon, into = c("Class", "Spec"), sep = "-") %>%
+  mutate(Spec = paste0(substr(Class,0,2),"-",Spec))
+
+Healer_Order <- df_player_2 %>%
+    filter(role=="Healer")%>%
+  
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(Spec) ) %>% group_by(Spec) %>% summarise(sum=n()) %>% arrange(desc(sum)) %>% select(Spec) %>% pull(.)
+```
+
+
+```{r}
+plot1<- df_player_2 %>%
+  mutate(Spec=factor(Spec,
+                      levels=Healer_Order),
+         encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing)) %>% 
+  filter(role=="Healer") %>%
+  
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(Spec) ) %>% 
+  filter(size==25 & difficulty=="Hard" | 
+           (size==25 & difficulty=="Normal" & encounterNameColor=="<b><span style='color:#000000;'>LK</span></b>")) %>%
+  
+  group_by(logID,fightID,encounterNameColor,Spec) %>%
+  summarise(n=n()) %>%
+  ungroup() %>%
+  complete(nesting(logID,fightID,encounterNameColor),Spec, fill=list(n=0)) %>%
+  
+  ggplot(mapping = aes(x = Spec, y = n, color=Spec)) +
+  geom_line() +
+  stat_summary(fun.y = "median", geom = "point", size = 3) +
+  
+  facet_wrap(.~encounterNameColor) +
+
+  scale_color_manual(values=c("#F48CBA","#2D2947","#0070DD","#FF7C0A","#665934")) + 
+  guides(color="none") +
+  labs(title="",x="",y="",
+       caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 02/10/2023 &#40;dd/mm/yyyy&#41; 06:00 UTC </p>"),
+       subtitle="<p># of Healers for each spec - Kills only </p>") +
+   vivax_theme() +
+  theme(strip.text.x = element_markdown(size = scale_factor * 12)) +
+  geom_hline(yintercept=seq(0,5,1),linetype="dotted",alpha=0.5)
+
+ggsave("./_img/transition/plot1_heal_class.png",plot1, 
+       width = 5, height =5,units="in",device = "png",dpi=300)
+```
+
+
+
+
+
+
 
 
 ```{r}
@@ -1621,12 +1691,31 @@ df_player %>% filter(role=="Healer") %>%
             max=max(n,na.rm=T),
             median=median(n,na.rm=T)) %>%
   arrange(desc(median))
+```
 
 
+```{r}
+ df_player %>% filter(encounterNameColor=="<b><span style='color:#040A54;'>Valithria</span></b>") %>%
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(icon) ) %>% 
+  filter(size==25 & difficulty=="Hard" ) %>%
+  group_by(logID,fightID,encounterNameColor,role) %>%
+  summarise(n=n()) %>% 
+  arrange(desc(n)) %>%
+  pivot_wider(names_from = role, values_from = n) %>%
+  mutate(sum = DPS + Healer + Tank,
+         link = paste0("https://classic.warcraftlogs.com/reports/",logID,"#fight=",fightID)) %>% filter(sum<25)%>% write.csv("./Val_Amy.csv")
+  
+  
+  group_by(encounterNameColor,role) %>%
+  summarise(min=min(n,na.rm=T),
+            max=max(n,na.rm=T),
+            median=median(n,na.rm=T)) %>%
+  arrange(desc(median))
+```
 
 
-
-
+```{r}
 df_player %>% filter(role=="Healer") %>%
   filter(!is.na(encounterNameColor) ) %>% 
   filter(!is.na(icon) ) %>% 
@@ -1637,14 +1726,14 @@ df_player %>% filter(role=="Healer") %>%
 
 
 
-df_player %>% filter(role=="Tank") %>%
+df_player %>% filter(role=="Healer") %>%
   filter(!is.na(encounterNameColor) ) %>% 
   filter(!is.na(icon) ) %>% 
   filter(size==25 & difficulty=="Hard" ) %>%
   group_by(logID,fightID,encounterNameColor,icon) %>%
   summarise(n=n()) %>% 
-  filter(encounterNameColor=="<b><span style='color:#464646;'>Saurfang</span></b>") %>%
-  arrange(icon)
+  filter(encounterNameColor=="<b><span style='color:#464646;'>Marrow</span></b>") %>%
+  arrange(desc(n))
 ```
 
 
