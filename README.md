@@ -38,7 +38,7 @@ While the data is interesting, it is extremely limited. For this reason, I am ad
 If you want to see additional metrics for 25-man (and 10-man) heroic raid compositions, `D.A.R` has made a sheet where you can explore further:  
 
 - 10-man heroic: https://docs.google.com/spreadsheets/d/1r7BOYqfgSsSLKJ3gaPwlqH4fpXG0t2Qr83BsVEl9QYg
-- 25-man heroic: https://docs.google.com/spreadsheets/d/1ZEZnAQJECkhzISK1P1pfjIPBx6ssmomOwfBai3-PSN0/edit?usp=sharing
+- 25-man heroic: https://docs.google.com/spreadsheets/d/1ZEZnAQJECkhzISK1P1pfjIPBx6ssmomOwfBai3-PSN0
 
 ## 2nd round of PTR testing
 
