@@ -58,6 +58,24 @@ request_encounter_str <- '{
 
 ```
 
+
+```{r}
+request_playerdetails_str <- '{
+    reportData {
+        report(code: "%s") {
+            playerDetails(translate: true
+                          fightIDs: %i)
+        }
+        }
+    }'
+
+
+
+
+```
+
+
+
 ## + API req.
 
 ```{r}
@@ -163,8 +181,8 @@ df <- bind_rows(df_round1,df_round2) %>%
 ## + Round #3
 
 ```{r}
-df1 <- read.csv("./raw_data/0_download_round3/response_logs_code_df__ICC_2023_09_28_h02_m48.csv")
-df2 <- read.csv("./raw_data/0_download_round3/response_logs_code_df_ICC_2023_09_30_h03_m45.csv")
+df1 <- read.csv("./raw_data/0_download_round3/logID/response_logs_code_df__ICC_2023_09_28_h02_m48.csv")
+df2 <- read.csv("./raw_data/0_download_round3/logID/response_logs_code_df_ICC_2023_09_30_h03_m45.csv")
 
 df_round3<- bind_rows(df1,df2) %>%
   distinct(code, .keep_all = TRUE) %>%
@@ -174,20 +192,10 @@ df_round3<- bind_rows(df1,df2) %>%
   
   filter(endTime >= "2023-09-24")
 
-
-
 ```
-
-
 
 
 # Encounter Data
-
-```{r}
-logIDs <- unique(df_round3$code)
-
-request_encounter <- sprintf(request_encounter_str, logIDs)
-```
 
 
 ```{r}
@@ -263,8 +271,14 @@ df_encounter_round1_final2 %>%
 
 
 #df_encounter_round2 %>% filter(encounterID==856 & kill==TRUE)
+3501-257
+
+3244-3197
 
 
+454660-49382
+
+df_encounter_round3_final2 %>% group_by(logID,fightID) %>% summarise(n=n())
 ```
 #### -Round 3
 
@@ -533,6 +547,107 @@ df_round3 %>% rename(logID = code, starTimeLog=startTime, endTimeLog=endTime) %>
 
 
 
+# Extra role data
 
 
+
+```{r}
+role_round3 <- df_encounter_round3_final2 %>% filter(kill==T)
+
+role_round3_logs <- role_round3 %>% select(logID,fightID)
+
+logIDs <- role_round3_logs$logID
+fightIDs <- role_round3_logs$fightID
+
+request_players <- sprintf(request_playerdetails_str, logIDs,fightIDs)
+
+n_loop <- length(request_players)
+```
+
+
+```{r}
+
+output <- lapply(seq_along(request_players), function(i) {  
+  
+  response <- WCL_API2_request(request_players[i])
+  
+  
+  if(!is.null(response) & length(response)>0) {
+    
+    
+    tank <- response$data$reportData$report$playerDetails$data$playerDetails$tanks
+    
+    healer <- response$data$reportData$report$playerDetails$data$playerDetails$healers
+    
+    dps <- response$data$reportData$report$playerDetails$data$playerDetails$dps
+    
+    if(is.null(tank)) {
+      
+      tank <- data.frame(id=-1,
+                         logID = as.character(logIDs[i]),
+                         role="Tank")} else {  tank <- tank %>% mutate(role="Tank")     }
+    
+    if(is.null(healer)) {
+      
+      healer <- data.frame(id=-1,
+                           logID = as.character(logIDs[i]),
+                           role="Healer")} else {  healer <- healer %>% mutate(role="Healer")     }
+    
+    if(is.null(dps)) {
+      
+      dps <- data.frame(id=-1,
+                        logID = as.character(logIDs[i]),
+                        role="Tank")} else {  dps <- dps %>% mutate(role="DPS")     }
+    
+    response <-  bind_rows(tank,healer,dps) %>% mutate(
+      logID = as.character(logIDs[i]),
+      fightID = as.character(fightIDs[i])
+    )
+    
+  } else {
+    
+    response <- data.frame(id=-1,
+                           logID = as.character(logIDs[i]),
+                           fightID = as.character(fightIDs[i])
+    )
+  }
+  
+  if (i %% 5 == 0) {
+    cat("Processed", i, "out of",n_loop, "\n")
+  }
+  
+  rm(tank,healer,dps)
+  
+  return(response)
+})
+
+player_data <- do.call(bind_rows, output)
+
+
+
+write.csv(player_data %>% select(-c(specs,combatantInfo)),paste0("./raw_data/0_download_round3/player_data_",format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"))
+
+saveRDS(player_data,paste0("./raw_data/0_download_round3/player_data_",format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".RDS"))
+
+
+player_data %>% head(10)
+
+player_data %>% 
+  group_by(logID,role) %>%
+  summarise(n=n())
+
+player_data %>% 
+  group_by(icon,role) %>%
+  summarise(n=n()) %>%
+  arrange(role,desc(n))
+
+
+```
+
+
+
+
+```{r}
+
+```
 
