@@ -1563,6 +1563,8 @@ df_final %>% filter(difficulty=="Hard" & size==25) %>%  group_by(logID,fightID) 
 df_final %>% filter(difficulty=="Normal" & size==10) %>%  group_by(kill) %>% summarise(n=n())
 ```
 
+# Role plots
+
 ```{r}
 player_explore <- df_player %>% filter(role=="Healer") %>%
   filter(!is.na(encounterNameColor) ) %>% 
@@ -1579,27 +1581,288 @@ player_explore <- df_player %>% filter(role=="Healer") %>%
 ```{r}
 df_player_2 <- df_player %>%
   separate(icon, into = c("Class", "Spec"), sep = "-") %>%
-  mutate(Spec = paste0(substr(Class,0,2),"-",Spec))
+  mutate(Spec = paste0(substr(Class,0,2),"-",Spec),
+         Class2 = case_when(
+           
+           Spec == "Wa-Affliction" ~"Ranged",
+           Spec == "Ma-Fire" ~"Ranged",
+           Spec == "Hu-Survival" ~"Ranged",
+           Spec == "Dr-Balance" ~"Ranged",
+           Spec == "Wa-Demonology" ~"Ranged",
+           Spec == "Pr-Shadow" ~"Ranged",
+           Spec == "Sh-Elemental" ~"Ranged",
+           Spec == "Hu-Marksmanship" ~"Ranged",
+           Spec == "Wa-Destruction" ~"Ranged",
+           Spec == "Ma-Arcane" ~"Ranged",
+           Spec == "Hu-BeastMastery" ~"Ranged",
+           Spec == "Ma-Frost" ~"Ranged",
+           
+           Spec == "De-Unholy" ~"Melee",
+           Spec == "Wa-Fury" ~"Melee",
+           Spec == "Pa-Retribution" ~"Melee",
+           Spec == "Ro-Combat" ~"Melee",
+           Spec == "Dr-Feral" ~"Melee",
+           Spec == "Sh-Enhancement" ~"Melee",
+           Spec == "De-Frost" ~"Melee",
+           Spec == "Ro-Assassination" ~"Melee",
+           Spec == "Wa-Arms" ~"Melee",
+           Spec == "Ro-Subtlety" ~ "Melee",
+
+           .default = Spec
+         ),
+         Spec2 = case_when(
+           Spec == "Wa-Affliction" ~"Affli",
+           Spec == "Ma-Fire" ~"Fire",
+           Spec == "Hu-Survival" ~"Surv",
+           Spec == "Dr-Balance" ~"Boomie",
+           Spec == "Wa-Demonology" ~"Demo",
+           Spec == "Pr-Shadow" ~"Spriest",
+           Spec == "Sh-Elemental" ~"Ele",
+           Spec == "Hu-Marksmanship" ~"MM",
+           Spec == "Wa-Destruction" ~"Destro",
+           Spec == "Ma-Arcane" ~"Others",
+           Spec == "Hu-BeastMastery" ~"Others",
+           Spec == "Ma-Frost" ~"Others",
+           
+           Spec == "De-Unholy" ~"UHDK",
+           Spec == "Wa-Fury" ~"Fury",
+           Spec == "Pa-Retribution" ~"Ret",
+           Spec == "Ro-Combat" ~"Comb",
+           Spec == "Dr-Feral" ~"Feral",
+           Spec == "Sh-Enhancement" ~"Enhance",
+           Spec == "De-Frost" ~"FrostDK",
+           Spec == "Ro-Assassination" ~"Assa",
+           Spec == "Wa-Arms" ~"Others",
+           Spec == "Ro-Subtlety" ~ "Others",
+           
+           Spec == "Sh-Restoration" ~ "RestoSham",
+           Spec == "Dr-Restoration" ~ "RestoDru",
+           Spec == "Pr-Discipline" ~ "Disc",
+           Spec == "Pr-Holy" ~"HolyPri",
+           Spec == "Pa-Holy" ~"HPal",
+           
+           
+           Spec == "Pa-Justicar" ~"Paladin",
+           Spec == "Pa-Protection" ~"Paladin",
+           Spec == "Wa-Protection" ~"Warrior",
+           Spec == "Wa-Gladiator" ~"Warrior",
+           Spec == "Wa-Champion" ~"Warrior",
+           Spec == "Dr-Guardian" ~"Druid",
+           Spec == "Dr-Warden" ~"Druid",
+           Spec == "De-BloodDPS" ~"DK",
+           
+           
+           .default = Spec
+         ),
+         Spec = case_when(
+           
+           Spec == "Sh-Restoration" ~ "Sh-Resto",
+           Spec == "Dr-Restoration" ~ "Dru-Resto",
+           Spec == "Pr-Discipline" ~ "Pri-Disc",
+           Spec == "Pr-Holy" ~"Pri-Holy",
+           Spec == "Pa-Holy" ~"Pal-Holy",
+           
+           Spec == "Wa-Affliction" ~"Lock-Affli",
+           Spec == "Ma-Fire" ~"Mage-Fire",
+           Spec == "De-Unholy" ~"DK-Uh",
+           Spec == "Hu-Survival" ~"Hu-Surv",
+           Spec == "Dr-Balance" ~"Dru-Boom",
+           Spec == "Wa-Fury" ~"Warr-Fury",
+           Spec == "Pa-Retribution" ~"Pal-Ret",
+           Spec == "Wa-Demonology" ~"Lock-Demo",
+           Spec == "Pr-Shadow" ~"Pri-Shadow",
+           Spec == "Ro-Combat" ~"Rog-Comb",
+           Spec == "Dr-Feral" ~"Dru-Feral",
+           Spec == "Sh-Enhancement" ~"Sha-Enhance",
+           Spec == "De-Frost" ~"DK-Frost",
+           Spec == "Sh-Elemental" ~"Sha-Ele",
+           Spec == "Ro-Assassination" ~"Rog-Assa",
+           Spec == "Hu-Marksmanship" ~"Hu-MM",
+           Spec == "Wa-Destruction" ~"Others",
+           Spec == "Ma-Arcane" ~"Others",
+           Spec == "Wa-Arms" ~"Others",
+           Spec == "Hu-BeastMastery" ~"Others",
+           Spec == "Ma-Frost" ~"Others",
+           Spec == "Pr-Elemental" ~ "Pri-Shadow",
+           Spec == "Ro-Subtlety" ~ "Others",
+           
+           .default = Spec
+         ),
+         encounterNameColor = ifelse(encounterNameColor=="<b><span style='color:#000000;'>LK</span></b>",
+                                     "<b><span style='color:#000000;'>LK (N)</span></b>",encounterNameColor)
+         )
+```
+
+
+```{r}
+boss_order_wing2 <- c(
+  "<b><span style='color:#464646;'>Marrow</span></b>" ,  
+  "<b><span style='color:#464646;'>LDW</span></b>"  ,    
+  "<b><span style='color:#464646;'>Gunship</span></b>" ,
+  "<b><span style='color:#464646;'>Saurfang</span></b>" ,
+  "<b><span style='color:#397000;'>Rotface</span></b>"  ,
+  "<b><span style='color:#397000;'>Festergut</span></b>" ,
+  "<b><span style='color:#397000;'>Putricide</span></b>",
+  "<b><span style='color:#6D0027;'>Council</span></b>" ,
+  "<b><span style='color:#6D0027;'>Queen</span></b>"  ,
+  "<b><span style='color:#040A54;'>Valithria</span></b>",
+  "<b><span style='color:#040A54;'>Sindra</span></b>",  
+  "<b><span style='color:#000000;'>LK (N)</span></b>"
+)
+
+
 
 Healer_Order <- df_player_2 %>%
     filter(role=="Healer")%>%
-  
   filter(!is.na(encounterNameColor) ) %>% 
   filter(!is.na(Spec) ) %>% group_by(Spec) %>% summarise(sum=n()) %>% arrange(desc(sum)) %>% select(Spec) %>% pull(.)
+
+Healer_Order2 <- df_player_2 %>%
+    filter(role=="Healer")%>%
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(Spec2) ) %>% group_by(Spec2) %>% summarise(sum=n()) %>% arrange(desc(sum)) %>% select(Spec2) %>% pull(.)
+
+
+
+
+Tank_Order <- df_player_2 %>%
+    filter(role=="Tank")%>%
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(Spec) ) %>% group_by(Spec) %>% summarise(sum=n()) %>% arrange(desc(sum)) %>% select(Spec) %>% pull(.)
+
+
+Tank_Order2 <- df_player_2 %>%
+    filter(role=="Tank")%>%
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(Spec2) ) %>% group_by(Spec2) %>% summarise(sum=n()) %>% arrange(desc(sum)) %>% select(Spec2) %>% pull(.)
+
+
+
+DPS_Order <- df_player_2 %>%
+    filter(role=="DPS")%>%
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(Spec) ) %>% group_by(Spec) %>% summarise(sum=n()) %>% arrange(desc(sum)) %>% select(Spec) %>% pull(.)
+
+
+
+ranged_DPS_Order <- df_player_2 %>%
+    filter(Class2=="Ranged")%>%
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(Spec2) ) %>% group_by(Spec2) %>% summarise(sum=n()) %>% arrange(desc(sum)) %>% select(Spec2) %>% pull(.)
+
+
+melee_DPS_Order <- df_player_2 %>%
+    filter(Class2=="Melee")%>%
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(Spec2) ) %>% group_by(Spec2) %>% summarise(sum=n()) %>% arrange(desc(sum)) %>% select(Spec2) %>% pull(.)
 ```
+
+### Healers
 
 ```{r}
 plot1<- df_player_2 %>%
-  mutate(Spec=factor(Spec,
-                      levels=Healer_Order),
+  mutate(Spec2=factor(Spec2,
+                      levels=Healer_Order2),
          encounterNameColor=factor(encounterNameColor,
-                                                   levels=boss_order_wing)) %>% 
+                                                   levels=boss_order_wing2)) %>% 
   filter(role=="Healer") %>%
+  
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(Spec2) ) %>% 
+  filter(size==25 & difficulty=="Hard" | 
+           (size==25 & difficulty=="Normal" & encounterNameColor=="<b><span style='color:#000000;'>LK (N)</span></b>")) %>%
+  
+  group_by(logID,fightID,encounterNameColor,Spec2) %>%
+  summarise(n=n()) %>%
+  ungroup() %>%
+  complete(nesting(logID,fightID,encounterNameColor),Spec2, fill=list(n=0)) %>%
+  
+  ggplot(mapping = aes(x = Spec2, y = n, color=Spec2)) +
+  geom_hline(yintercept=seq(0,5,1),linetype="dotted",alpha=0.5)+
+  geom_line() +
+  stat_summary(fun.y = "median", geom = "point", size = 2.5) +
+  
+  facet_wrap(.~encounterNameColor) +
+
+  scale_color_manual(values=c("#F48CBA","#00A2A1","#0070DD","#FF7C0A","#E9D38E")) + 
+  guides(color="none") +
+  labs(title="Healers - 3rd ICC PTR",x="",y="",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; discord.gg/wp55kqmyYG - Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR - VERSION 1 04/10/2023 &#40;dd/mm/yyyy&#41; 11:00 UTC </p>"),
+       subtitle="<p>Heroic 25-man kills only (except Lich King) / max., median, min.<p>") +
+   vivax_theme()  +
+  theme(strip.text.x = element_markdown(size = scale_factor * 10),
+          axis.text.x = element_markdown(size= scale_factor * 8.5,
+                                         angle=45,hjust=1,
+                                         margin = margin(t = -1, unit = "pt")),
+          plot.subtitle = element_markdown(face="italic",
+                                           size = scale_factor * 12,
+                                           lineheight=0.3,
+                                        margin = margin(b = -5)))
+
+ggsave("./_img/transition/plot1_heal_class.png",plot1, 
+       width = 6, height =5,units="in",device = "png",dpi=300)
+```
+
+### Tanks
+
+```{r}
+plot2<- df_player_2 %>%
+  mutate(Spec2=factor(Spec2,
+                      levels=Tank_Order2),
+         encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing2)) %>% 
+  filter(role=="Tank") %>%
+  
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(Spec2) ) %>% 
+  filter(size==25 & difficulty=="Hard" | 
+           (size==25 & difficulty=="Normal" & encounterNameColor=="<b><span style='color:#000000;'>LK (N)</span></b>")) %>%
+  
+  group_by(logID,fightID,encounterNameColor,Spec2) %>%
+  summarise(n=n()) %>%
+  ungroup() %>%
+  complete(nesting(logID,fightID,encounterNameColor),Spec2, fill=list(n=0)) %>%
+  
+  ggplot(mapping = aes(x = Spec2, y = n, color=Spec2))+
+  geom_hline(yintercept=seq(0,3,1),linetype="dotted",alpha=0.5) +
+  geom_line() +
+  stat_summary(fun.y = "median", geom = "point", size = 2.5) +
+  
+  facet_wrap(.~encounterNameColor) +
+
+  scale_color_manual(values=c("#F48CBA","#C41E3A","#C69B6D","#FF7C0A")) + 
+  guides(color="none")  +
+  labs(title="Tanks - 3rd ICC PTR",x="",y="",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; discord.gg/wp55kqmyYG - Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR - VERSION 1 04/10/2023 &#40;dd/mm/yyyy&#41; 11:00 UTC </p>"),
+       subtitle="<p>Heroic 25-man kills only (except Lich King) / max., median, min.<p>") +
+   vivax_theme()  +
+  theme(strip.text.x = element_markdown(size = scale_factor * 10),
+          axis.text.x = element_markdown(size= scale_factor * 8.5,
+                                         angle=45,hjust=1,
+                                         margin = margin(t = -1, unit = "pt")),
+          plot.subtitle = element_markdown(face="italic",
+                                           size = scale_factor * 12,
+                                           lineheight=0.3,
+                                        margin = margin(b = -5)))
+ggsave("./_img/transition/plot1_tank_class.png",plot2, 
+       width = 6, height =5,units="in",device = "png",dpi=300)
+```
+
+### DPS all
+
+```{r}
+
+plot3<- df_player_2 %>%
+  mutate(Spec=factor(Spec,
+                      levels=DPS_Order),
+         encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing2)) %>% 
+  filter(role=="DPS") %>%
   
   filter(!is.na(encounterNameColor) ) %>% 
   filter(!is.na(Spec) ) %>% 
   filter(size==25 & difficulty=="Hard" | 
-           (size==25 & difficulty=="Normal" & encounterNameColor=="<b><span style='color:#000000;'>LK</span></b>")) %>%
+           (size==25 & difficulty=="Normal" & encounterNameColor=="<b><span style='color:#000000;'>LK (N)</span></b>")) %>%
   
   group_by(logID,fightID,encounterNameColor,Spec) %>%
   summarise(n=n()) %>%
@@ -1607,22 +1870,126 @@ plot1<- df_player_2 %>%
   complete(nesting(logID,fightID,encounterNameColor),Spec, fill=list(n=0)) %>%
   
   ggplot(mapping = aes(x = Spec, y = n, color=Spec)) +
+  geom_hline(yintercept=seq(0,6,1),linetype="dotted",alpha=0.5) +
   geom_line() +
   stat_summary(fun.y = "median", geom = "point", size = 3) +
+  scale_y_continuous(breaks= seq(0,6,1),
+                     labels = seq(0,6,1)) +
   
   facet_wrap(.~encounterNameColor) +
 
-  scale_color_manual(values=c("#F48CBA","#2D2947","#0070DD","#FF7C0A","#665934")) + 
+ scale_color_manual(values=c("#3FC7EB","#8788EE","#C41E3A","#AAD372","#FF7C0A","#C69B6D",
+                             "#F48CBA","#8788EE","#ECECEC","#FFF468","#FF7C0A","#0070DD",
+                             "#C41E3A","#0070DD","#FFF468","black","#AAD372")) + 
   guides(color="none") +
   labs(title="",x="",y="",
        caption=c("<p> Buy me a coffee: https:&#47;&#47;www&#46;ko-fi.com/forge","<br ALIGN = 'LEFT'/> VERSION 1 03/10/2023 &#40;dd/mm/yyyy&#41; 16:00 UTC </p>"),
-       subtitle="<p># of Healers for each spec - Kills only </p>") +
+       subtitle="<p>Distribution of DPS Specs per raid - Heroic 25-man kills only (except Lich King) - max., median, min. </p>") +
    vivax_theme() +
-  theme(strip.text.x = element_markdown(size = scale_factor * 12)) +
-  geom_hline(yintercept=seq(0,5,1),linetype="dotted",alpha=0.5)
+  theme(strip.text.x = element_markdown(size = scale_factor * 12))
 
-ggsave("./_img/transition/plot1_heal_class.png",plot1, 
-       width = 5, height =5,units="in",device = "png",dpi=300)
+ggsave("./_img/transition/plot1_DPS_class.png",plot3, 
+       width = 12, height =5,units="in",device = "png",dpi=300)
+```
+
+## DPS Ranged
+
+```{r}
+
+plot3<- df_player_2 %>%
+  mutate(Spec2=factor(Spec2,
+                      levels=ranged_DPS_Order),
+         encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing2)) %>% 
+  filter(Class2=="Ranged") %>%
+  
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(Spec2) ) %>% 
+  filter(size==25 & difficulty=="Hard" | 
+           (size==25 & difficulty=="Normal" & encounterNameColor=="<b><span style='color:#000000;'>LK (N)</span></b>")) %>%
+  
+  group_by(logID,fightID,encounterNameColor,Spec2) %>%
+  summarise(n=n()) %>%
+  ungroup() %>%
+  complete(nesting(logID,fightID,encounterNameColor),Spec2, fill=list(n=0)) %>%
+  
+  ggplot(mapping = aes(x = Spec2, y = n, color=Spec2)) +
+  geom_hline(yintercept=seq(0,6,1),linetype="dotted",alpha=0.5) +
+  geom_line() +
+  stat_summary(fun.y = "median", geom = "point", size = 2.5) +
+  scale_y_continuous(breaks= seq(0,6,1),
+                     labels = seq(0,6,1)) +
+  
+  facet_wrap(.~encounterNameColor) +
+
+ scale_color_manual(values=c("#3FC7EB","#8788EE","#AAD372","#FF7C0A","#8788EE","#ECECEC",
+                             "#0070DD","#AAD372","#8788EE","black")) + 
+  guides(color="none") +
+  labs(title="Ranged DPS - 3rd ICC PTR",x="",y="",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; discord.gg/wp55kqmyYG - Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR - VERSION 1 04/10/2023 &#40;dd/mm/yyyy&#41; 11:00 UTC </p>"),
+       subtitle="<p>Heroic 25-man kills only (except Lich King) / max., median, min.<p>") +
+   vivax_theme() +
+  theme(strip.text.x = element_markdown(size = scale_factor * 10),
+          axis.text.x = element_markdown(size= scale_factor * 8.5,
+                                         angle=45,hjust=1,
+                                         margin = margin(t = -1, unit = "pt")),
+          plot.subtitle = element_markdown(face="italic",
+                                           size = scale_factor * 12,
+                                           lineheight=0.3,
+                                        margin = margin(b = -5)))
+
+ggsave("./_img/transition/plot2_DPS_class.png",plot3, 
+       width = 6, height =5,units="in",device = "png",dpi=300)
+```
+
+## DPS Melee
+
+```{r}
+
+plot3<- df_player_2 %>%
+  mutate(Spec2=factor(Spec2,
+                      levels=melee_DPS_Order),
+         encounterNameColor=factor(encounterNameColor,
+                                                   levels=boss_order_wing2)) %>% 
+  filter(Class2=="Melee") %>%
+  
+  filter(!is.na(encounterNameColor) ) %>% 
+  filter(!is.na(Spec2) ) %>% 
+  filter(size==25 & difficulty=="Hard" | 
+           (size==25 & difficulty=="Normal" & encounterNameColor=="<b><span style='color:#000000;'>LK (N)</span></b>")) %>%
+  
+  group_by(logID,fightID,encounterNameColor,Spec2) %>%
+  summarise(n=n()) %>%
+  ungroup() %>%
+  complete(nesting(logID,fightID,encounterNameColor),Spec2, fill=list(n=0)) %>%
+  
+  ggplot(mapping = aes(x = Spec2, y = n, color=Spec2)) +
+  geom_hline(yintercept=seq(0,6,1),linetype="dotted",alpha=0.5) +
+  geom_line() +
+  stat_summary(fun.y = "median", geom = "point", size = 2.5) +
+  scale_y_continuous(breaks= seq(0,6,1),
+                     labels = seq(0,6,1)) +
+  
+  facet_wrap(.~encounterNameColor) +
+
+ scale_color_manual(values=c("#C41E3A","#C69B6D","#F48CBA","#FFF468","#FF7C0A","#0070DD",
+                             "#C41E3A","#FFF468","black")) + 
+  guides(color="none")  +
+  labs(title="Melee DPS - 3rd ICC PTR",x="",y="",
+       caption=c("<p><span style='font-family:forgefooter'>&#xe900;</span> &emsp; discord.gg/wp55kqmyYG - Discfordge &#91;Vivax-Pagle(US)&#93;"," <br> <span style='font-family:forgefooter'>&#xe901;</span> https:&#47;&#47;www&#46;github.com/ForgeGit/ICC_PTR - VERSION 1 04/10/2023 &#40;dd/mm/yyyy&#41; 11:00 UTC </p>"),
+       subtitle="<p>Heroic 25-man kills only (except Lich King) / max., median, min.<p>") +
+   vivax_theme()  +
+  theme(strip.text.x = element_markdown(size = scale_factor * 10),
+          axis.text.x = element_markdown(size= scale_factor * 8.5,
+                                         angle=45,hjust=1,
+                                         margin = margin(t = -1, unit = "pt")),
+          plot.subtitle = element_markdown(face="italic",
+                                           size = scale_factor * 12,
+                                           lineheight=0.3,
+                                        margin = margin(b = -5)))
+
+ggsave("./_img/transition/plot3_DPS_class.png",plot3, 
+       width = 6, height =5,units="in",device = "png",dpi=300)
 ```
 
 ```{r}
@@ -1706,6 +2073,105 @@ df_player %>% filter(role=="Healer") %>%
 ```{r}
 a <- df_final %>% filter(encounterID==856 & kill==T)
 ```
+
+# Class Canvas
+
+
+# Title segment
+
+```{r}
+###
+title <- ggplot() +
+    vivax_theme_title() +
+  labs(title="<p> Icecrown Citadel (ICC) Third PTR <br><b><span style='color:#006CD1;'>Kills</span></b> and <b><span style='color:#994F00;'>Wipes</span></b></p>",
+       subtitle="<p>  </p>") +                                                   # Remove grid, color & borders
+  theme(axis.line = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
+
+
+
+ggsave("./_img/transition/plot_title.png",title,
+       width = 12, height =4,units="in",device = "png",dpi=300)
+
+
+
+plot_title  <- magick::image_read("./_img/transition/plot_title.png")
+###
+title <- ggplot()  +
+    vivax_theme_title() +
+  labs(title="",
+       subtitle="<p>Data from publicly uploaded logs to Warcraft Logs Classic from Sep 26 2023 22:30 to Sep 30 2023 02:00<br> <b><span style='color:#464646;'>Lower Spire</span>, <span style='color:#397000;'>Plague</span>, <span style='color:#6D0027;'>Blood</span></b> and <b><span style='color:#040A54;'>Frost</span></b> wing bosses + <b>The Frozen Throne (Lich King)</b></p>") +                                                   # Remove grid, color & borders
+  theme(axis.line = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
+
+
+
+ggsave("./_img/transition/plot_subtitle.png",title,
+       width = 12, height =4,units="in",device = "png",dpi=300)
+
+
+
+plot_title_2  <- magick::image_read("./_img/transition/plot_subtitle.png")
+
+###
+title <- ggplot()  +
+    vivax_theme_title() +
+  labs(title="",
+       subtitle="") +                                                   # Remove grid, color & borders
+  theme(axis.line = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank())
+
+
+
+ggsave("./_img/transition/plot_title_white.png",title,
+       width = 12, height =4,units="in",device = "png",dpi=300)
+
+
+
+plot_title_white  <- magick::image_read("./_img/transition/plot_title_white.png")
+```
+
+
+```{r}
+img_ranged <- magick::image_read("./_img/transition/plot2_DPS_class.png")
+img_melee <- magick::image_read("./_img/transition/plot3_DPS_class.png")
+img_tank <- magick::image_read("./_img/transition/plot1_tank_class.png")
+img_heal <- magick::image_read("./_img/transition/plot1_heal_class.png")
+```
+
+```{r}
+canvas <- image_blank(width = 3600, height = 3000)
+
+
+#canvas <- image_composite(canvas, plot_title_white, offset = "+0+0",operator = "over")
+#canvas <- image_composite(canvas, plot_title, offset = "+160+10",operator = "over")
+#canvas <- image_composite(canvas, plot_title_2, offset = "+1250+0",operator = "over")
+
+#canvas <- image_composite(canvas,plot_25_n_img , offset = "+0+145",operator = "over")
+#canvas <- image_composite(canvas,plot_ridge_25_n_img  , offset = "+1800+145",operator = "over")
+
+canvas <- image_composite(canvas,img_heal  , offset = "+300+0",operator = "over")
+canvas <- image_composite(canvas,img_tank  , offset = "+1800+0",operator = "over")
+canvas <- image_composite(canvas,img_ranged  , offset = "+0+1400",operator = "over")
+canvas <- image_composite(canvas,img_melee  , offset = "+1800+1400",operator = "over")
+
+
+image_write(canvas, "./_img/ICCPTR_3rdSession_Classes.jpg")
+
+```
+
+
+
+
 
 ## Full clears
 
