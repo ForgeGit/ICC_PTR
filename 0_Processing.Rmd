@@ -648,6 +648,20 @@ player_data %>%
 
 
 ```{r}
+df_player <- read.csv("raw_data/0_download_round3/player_data_2023_10_02_h05_m17.csv")
+df_temp <-read.csv("raw_data/ICC_PTR_clean_Data_3rdround_2023_09_30_h08_m13.csv")
 
+df_player <- df_player %>%
+left_join(df_temp %>% select(difficulty,size,fightID,logID,encounterName,link), by=c("logID","fightID")) %>%
+  mutate(role = ifelse(icon=="DeathKnight-BloodDPS","Tank",role)) %>%
+  filter(!is.na(icon)) %>%
+  separate(icon, into = c("Class", "Spec"), sep = "-") 
+
+
+df_player %>% select(logID, fightID,encounterName, size, difficulty,role,Class,Spec,link) %>%
+  
+  group_by(logID, fightID,encounterName, size, difficulty,role,Class,Spec,link) %>% summarise(n=n())%>% relocate(link, .after = last_col()) %>% 
+  write.csv(paste0("./raw_data/ICC_PTR_clean_Data_3rdround_CLASS_DATA_",
+                   format(Sys.time(), "%Y_%m_%d_h%H_m%M"),".csv"), row.names = F)
 ```
 

@@ -2,6 +2,15 @@
 
 PTR data for the raid "The Icecrown Citadel" (ICC) - World of Warcraft: Wrath of the Lich King Classic (2023) 
 
+# Table of Contents 📜
+
+1. [3rd Round](#3rd-round-of-ptr-testing)<br>
+2. [3rd Round](#3rd-round-class-data)<br>
+3. [2nd Round](#2nd-round-of-ptr-testing)<br>
+4. [1st Round](#1st-round-of-ptr-testing)<br>
+5. [Methodology](#methodology)<br>
+6. [Limitations](#limitations)<br>
+
 ## 3rd round of PTR testing
 
 ### 25 man HEROIC
@@ -15,6 +24,21 @@ PTR data for the raid "The Icecrown Citadel" (ICC) - World of Warcraft: Wrath of
 
 ### 10 man NORMAL
 <img src="_img/ICCPTR_3rdSession_v3_10mN.png"/>
+
+## 3rd round class data (Heroic only)
+
+The graphics above show the "overall distribution" for each CLASS.<br>
+While the data is interesting, it is extremely limited. For this reason, I am adding the following graphics by specs for 25-man Heroic.
+
+<img src="_img/transition/plot1_tank_class.png"/><br>
+<img src="_img/transition/plot1_heal_class.png"/><br>
+<img src="_img/transition/plot3_DPS_class.png"/><br>
+<img src="_img/transition/plot2_DPS_class.png"/>
+
+If you want to see additional metrics for 25-man (and 10-man) heroic raid compositions, `D.A.R` has made a sheet where you can explore further:  
+
+- 10-man heroic: https://docs.google.com/spreadsheets/d/1r7BOYqfgSsSLKJ3gaPwlqH4fpXG0t2Qr83BsVEl9QYg
+- 25-man heroic: https://docs.google.com/spreadsheets/d/1ZEZnAQJECkhzISK1P1pfjIPBx6ssmomOwfBai3-PSN0/edit?usp=sharing
 
 ## 2nd round of PTR testing
 
