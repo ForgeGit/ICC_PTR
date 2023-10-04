@@ -4,12 +4,12 @@ PTR data for the raid "The Icecrown Citadel" (ICC) - World of Warcraft: Wrath of
 
 # Table of Contents 📜
 
-1. [3rd Round](#3rd-round-of-ptr-testing)<br>
-2. [3rd Round](#3rd-round-class-data)<br>
-3. [2nd Round](#2nd-round-of-ptr-testing)<br>
-4. [1st Round](#1st-round-of-ptr-testing)<br>
-5. [Methodology](#methodology)<br>
-6. [Limitations](#limitations)<br>
+1. [3rd Round of PTR](#3rd-round-of-ptr-testing)<br>
+    1.1. [Additional Class Data](#3rd-round-class-data-25-man-heroic-only)<br>
+2. [2nd Round of PTR](#2nd-round-of-ptr-testing)<br>
+3. [1st Round of PTR](#1st-round-of-ptr-testing)<br>
+4. [Methodology and Data](#methodology)<br>
+5. [Limitations](#limitations)<br>
 
 ## 3rd round of PTR testing
 
@@ -25,10 +25,10 @@ PTR data for the raid "The Icecrown Citadel" (ICC) - World of Warcraft: Wrath of
 ### 10 man NORMAL
 <img src="_img/ICCPTR_3rdSession_v3_10mN.png"/>
 
-## 3rd round class data (Heroic only)
+## 3rd round class data (25-man Heroic only)
 
 The graphics above show the "overall distribution" for each CLASS.<br>
-While the data is interesting, it is extremely limited. For this reason, I am adding the following graphics by specs for 25-man Heroic.
+While the data is interesting, it is extremely limited. For this reason, I am adding the following graphics by spec to complement the previous ones.
 
 <img src="_img/transition/plot1_tank_class.png"/><br>
 <img src="_img/transition/plot1_heal_class.png"/><br>
